@@ -1,32 +1,51 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
-/// Styled ElevatedButton used across the app.
+/// Styled button used across the app.
+/// onPressed can be sync or async; async errors are caught to avoid unhandled exceptions.
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
     this.label,
-    required this.onPressed,
+    this.text,
+    this.onPressed,
     this.icon,
     this.isExpanded = true,
     this.isStyled = false,
   });
 
-  final String? label;
-  final VoidCallback onPressed;
+  final String? label; // preferred param
+  final String? text; // backward-compatible
+  final FutureOr<void> Function()? onPressed;
   final IconData? icon;
   final bool isExpanded;
   final bool isStyled;
 
   @override
   Widget build(BuildContext context) {
+    final String? effectiveLabel = label ?? text;
+    final bool enabled = onPressed != null;
+
+    Future<void> _handlePressed() async {
+      if (onPressed == null) return;
+      try {
+        final result = onPressed!.call();
+        if (result is Future) {
+          await result.catchError((_) {});
+        }
+      } catch (_) {
+        // swallow to avoid red screens; surface via error reporting later
+      }
+    }
+
     if (isStyled) {
       final Widget buttonChild = Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (label != null) ...[
+          if (effectiveLabel != null) ...[
             Text(
-              label!,
+              effectiveLabel,
               style: const TextStyle(
                 color: Colors.black87,
                 fontSize: 16,
@@ -44,29 +63,35 @@ class AppButton extends StatelessWidget {
         ],
       );
 
-      final Widget button = Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF87CEEB), // Light blue background
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+      final Widget button = Opacity(
+        opacity: enabled ? 1 : 0.6,
+        child: IgnorePointer(
+          ignoring: !enabled,
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF87CEEB), // Light blue background
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _handlePressed,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  child: buttonChild,
+                ),
               ),
-              child: buttonChild,
             ),
           ),
         ),
@@ -86,12 +111,12 @@ class AppButton extends StatelessWidget {
           Icon(icon, size: 18),
           const SizedBox(width: 8),
         ],
-        if (label != null) Text(label!),
+        if (effectiveLabel != null) Text(effectiveLabel),
       ],
     );
 
     final Widget button = ElevatedButton(
-      onPressed: onPressed,
+      onPressed: enabled ? _handlePressed : null,
       child: buttonChild,
     );
 
@@ -101,5 +126,4 @@ class AppButton extends StatelessWidget {
     return button;
   }
 }
-
 

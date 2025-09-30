@@ -7,6 +7,12 @@ import '../../screens/auth/presentation/signup_screen.dart';
 import '../../screens/auth/presentation/splash_screen.dart';
 import '../../screens/dashboard/presentation/dashboard_screen.dart';
 import '../../screens/dashboard/presentation/home_screen.dart';
+import '../../screens/courses/presentation/course_list_screen.dart';
+import '../../screens/courses/presentation/course_detail_screen.dart';
+import '../../screens/courses/presentation/module_player_screen.dart';
+import '../../screens/support/presentation/support_screen.dart';
+import '../../screens/profile/presentation/profile_screen.dart';
+import '../../screens/profile/presentation/profile_edit_screen.dart';
 
 /// Centralized application router using GoRouter
 /// Defines all app routes and navigation logic.
@@ -55,24 +61,37 @@ class AppRouter {
           GoRoute(
             path: 'courses',
             name: 'dashboardCourses',
-            builder: (context, state) => const _DashboardPlaceholder(title: 'Courses list'),
+            builder: (context, state) => const CourseListScreen(),
           ),
           GoRoute(
             path: 'courses/:id',
             name: 'dashboardCourseDetail',
-            builder: (context, state) => _DashboardPlaceholder(
-              title: 'Course: \\${state.pathParameters['id']}',
+            builder: (context, state) => CourseDetailScreen(courseId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: 'courses/:courseId/module/:moduleId',
+            name: 'dashboardModulePlayer',
+            builder: (context, state) => ModulePlayerScreen(
+              courseId: state.pathParameters['courseId']!,
+              moduleId: state.pathParameters['moduleId']!,
             ),
           ),
           GoRoute(
             path: 'profile',
             name: 'dashboardProfile',
-            builder: (context, state) => const _DashboardPlaceholder(title: 'Profile'),
+            builder: (context, state) => const ProfileScreen(),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                name: 'dashboardProfileEdit',
+                builder: (context, state) => const ProfileEditScreen(),
+              )
+            ],
           ),
           GoRoute(
-            path: 'Support',
+            path: 'support',
             name: 'dashboardSupport',
-            builder: (context, state) => const _DashboardPlaceholder(title: 'Support'),
+            builder: (context, state) => const SupportScreen(),
           ),
         ],
       ),

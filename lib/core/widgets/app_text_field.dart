@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 
+// ASSUMPTION: Backward-compatible wrapper over TextFormField supporting old and new params.
+// - Accepts both label/labelText and hint/hintText.
+// - Keeps a styled variant for specific UI needs.
+// Examples:
+// AppTextField(controller: c, labelText: 'Email');
+// AppTextField(controller: c, label: 'Message', maxLines: 4);
+// AppTextField(controller: c, hint: 'Search...');
+
 /// Reusable text field wrapper over TextFormField with styling support.
 class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,
-    this.controller,
+    required this.controller,
     this.label,
+    this.labelText,
     this.hint,
+    this.hintText,
     this.icon,
     this.keyboardType,
+    this.maxLines = 1,
     this.obscureText = false,
     this.validator,
     this.onChanged,
@@ -16,11 +27,14 @@ class AppTextField extends StatelessWidget {
     this.isStyled = false,
   });
 
-  final TextEditingController? controller;
-  final String? label;
-  final String? hint;
+  final TextEditingController controller;
+  final String? label; // friendly name
+  final String? labelText; // backward-compatible
+  final String? hint; // friendly name
+  final String? hintText; // backward-compatible
   final IconData? icon;
   final TextInputType? keyboardType;
+  final int maxLines;
   final bool obscureText;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
@@ -29,6 +43,9 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String? effectiveLabel = labelText ?? label;
+    final String? effectiveHint = hintText ?? hint;
+
     if (isStyled) {
       return Container(
         decoration: BoxDecoration(
@@ -49,12 +66,14 @@ class AppTextField extends StatelessWidget {
           validator: validator,
           onChanged: onChanged,
           textInputAction: textInputAction,
+          maxLines: maxLines,
           style: const TextStyle(
             color: Colors.black87,
             fontSize: 16,
           ),
           decoration: InputDecoration(
-            hintText: hint,
+            labelText: effectiveLabel,
+            hintText: effectiveHint,
             hintStyle: const TextStyle(
               color: Colors.black54,
               fontSize: 16,
@@ -83,13 +102,13 @@ class AppTextField extends StatelessWidget {
       validator: validator,
       onChanged: onChanged,
       textInputAction: textInputAction,
+      maxLines: maxLines,
       decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
+        labelText: effectiveLabel,
+        hintText: effectiveHint,
         prefixIcon: icon != null ? Icon(icon) : null,
       ),
     );
   }
 }
-
 

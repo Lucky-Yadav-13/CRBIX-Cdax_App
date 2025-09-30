@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'home_screen.dart';
+import '../../courses/presentation/course_list_screen.dart';
+import 'modules_screen.dart';
+import '../../support/presentation/support_screen.dart';
+import '../../profile/presentation/profile_screen.dart';
 
 /// DashboardScreen with BottomNavigation + PageView
 /// - Tabs: Home, Courses, Modules, Support, Profile
@@ -18,10 +22,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    _PlaceholderScreen(title: 'Courses'),
-    _PlaceholderScreen(title: 'Modules'),
-    _PlaceholderScreen(title: 'Support'),
-    _PlaceholderScreen(title: 'Profile'),
+    CourseListScreen(),
+    ModulesScreen(),
+    SupportScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -59,23 +63,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-/// TODO: Replace with actual feature screens when available
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.title});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () => context.go('/dashboard/home'),
-          child: const Text('Go to Home'),
-        ),
-      ),
-    );
-  }
-}
+// Removed placeholder screen; modules tab now uses ModulesScreen
 
 

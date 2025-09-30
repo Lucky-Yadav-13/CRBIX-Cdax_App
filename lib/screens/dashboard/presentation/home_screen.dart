@@ -4,6 +4,7 @@ import '../widgets/course_card.dart';
 import '../widgets/suggestive_learning_card.dart';
 import '../widgets/progress_card.dart';
 import 'package:go_router/go_router.dart';
+import '../../courses/data/mock_course_repository.dart';
 
 /// HomeScreen
 /// Assumptions:
@@ -32,7 +33,7 @@ class HomeScreen extends StatelessWidget {
               Text('Your courses', style: theme.textTheme.titleMedium),
               const SizedBox(height: 12),
               SizedBox(
-                height: 220,
+                height: 260,
                 child: FutureBuilder(
                   future: getMockEnrolledCourses(),
                   builder: (context, snapshot) {
@@ -58,6 +59,7 @@ class HomeScreen extends StatelessWidget {
                         return CourseCard(
                           width: 260,
                           title: c.title,
+                          subtitle: c.description,
                           thumbnailUrl: c.thumbnailUrl,
                           progressPercent: c.progressPercent,
                           isLocked: c.isLocked,
@@ -77,8 +79,20 @@ class HomeScreen extends StatelessWidget {
                 description:
                     'Pick up your next module and keep your learning streak alive.',
                 imageUrl: 'https://picsum.photos/seed/suggestive/800/400',
-                onPressed: () {
-                  // TODO: Deep link to suggested module/course
+                onPressed: () async {
+                  // Use last-played info to deep link; fallback to first course/module
+                  try {
+                    final repo = MockCourseRepository();
+                    final courses = await repo.getCourses();
+                    if (courses.isEmpty) return;
+                    final course = courses.first;
+                    final module = course.modules.firstWhere(
+                      (m) => !m.isLocked,
+                      orElse: () => course.modules.first,
+                    );
+                    // ignore: use_build_context_synchronously
+                    context.push('/dashboard/courses/${course.id}/module/${module.id}');
+                  } catch (_) {}
                 },
               ),
 
@@ -99,8 +113,19 @@ class HomeScreen extends StatelessWidget {
                   return ProgressCard(
                     title: 'Module ${index + 1}',
                     progress: (index + 1) * 0.12 % 1.0,
-                    onTap: () {
-                      // TODO: Navigate to module detail
+                    onTap: () async {
+                      try {
+                        final repo = MockCourseRepository();
+                        final courses = await repo.getCourses();
+                        if (courses.isEmpty) return;
+                        final course = courses[(index) % courses.length];
+                        final module = course.modules.firstWhere(
+                          (m) => !m.isLocked,
+                          orElse: () => course.modules.first,
+                        );
+                        // ignore: use_build_context_synchronously
+                        context.push('/dashboard/courses/${course.id}/module/${module.id}');
+                      } catch (_) {}
                     },
                   );
                 },

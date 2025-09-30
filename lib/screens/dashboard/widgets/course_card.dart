@@ -10,6 +10,7 @@ class CourseCard extends StatelessWidget {
     required this.title,
     required this.thumbnailUrl,
     required this.progressPercent,
+    this.subtitle,
     this.isLocked = false,
     this.onTap,
     this.width,
@@ -18,6 +19,7 @@ class CourseCard extends StatelessWidget {
   final String title;
   final String thumbnailUrl;
   final double progressPercent; // 0.0 - 1.0
+  final String? subtitle; // short description or course meta
   final bool isLocked;
   final VoidCallback? onTap;
   final double? width;
@@ -38,13 +40,12 @@ class CourseCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 110, // Constrained to avoid overflows in small cards
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
                     child: Image.network(
                       thumbnailUrl,
                       fit: BoxFit.cover,
@@ -52,32 +53,53 @@ class CourseCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600, height: 1.1),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(height: 1.1),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          minHeight: 8,
-                          value: progressPercent.clamp(0.0, 1.0),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceVariant.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: LinearProgressIndicator(
+                            minHeight: 6,
+                            value: progressPercent.clamp(0.0, 1.0),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${(progressPercent * 100).round()}%',
-                      style: theme.textTheme.labelSmall,
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Text(
+                        '${(progressPercent * 100).round()}%',
+                        style: theme.textTheme.labelSmall,
+                      ),
+                    ],
+                  ),
                 ),
                 if (isLocked) ...[
                   const SizedBox(height: 6),
