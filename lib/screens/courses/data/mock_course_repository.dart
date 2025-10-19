@@ -2,7 +2,6 @@
 // and returns canned data. Replace with RemoteCourseRepository later.
 
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'models/course.dart';
 import 'models/module.dart';
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'home_screen.dart';
 import '../../courses/presentation/course_list_screen.dart';
 import 'modules_screen.dart';

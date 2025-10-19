@@ -1,7 +1,6 @@
 // ASSUMPTION: Minimal profile state; integrate with backend later.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 @immutable
 class UserProfile {
@@ -36,24 +35,30 @@ class UserProfile {
   }
 }
 
-class ProfileNotifier extends StateNotifier<UserProfile> {
-  ProfileNotifier()
-      : super(const UserProfile(
-          name: 'Jane Doe',
-          email: 'jane@example.com',
-          phone: '+1 555 0100',
-          enrolledCoursesCount: 2,
-          subscribed: true,
-        ));
+class ProfileProvider extends ChangeNotifier {
+  UserProfile _profile = const UserProfile(
+    name: 'Jane Doe',
+    email: 'jane@example.com',
+    phone: '+1 555 0100',
+    enrolledCoursesCount: 2,
+    subscribed: true,
+  );
+
+  bool _isLoading = false;
+
+  UserProfile get profile => _profile;
+  bool get isLoading => _isLoading;
 
   Future<void> updateProfile(UserProfile updated) async {
+    _isLoading = true;
+    notifyListeners();
+
     await Future<void>.delayed(const Duration(milliseconds: 400));
-    state = updated;
+    
+    _profile = updated;
+    _isLoading = false;
+    notifyListeners();
   }
 }
-
-final profileProvider = StateNotifierProvider<ProfileNotifier, UserProfile>((ref) {
-  return ProfileNotifier();
-});
 
 

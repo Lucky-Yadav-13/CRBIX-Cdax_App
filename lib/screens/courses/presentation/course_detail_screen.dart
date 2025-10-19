@@ -99,6 +99,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                        final success = await _repo.enrollInCourse(course.id);
                                        if (mounted) {
                                          if (success) {
+                                           // ignore: use_build_context_synchronously
                                            ScaffoldMessenger.of(context).showSnackBar(
                                              const SnackBar(
                                                content: Text('Successfully enrolled in course!'),
@@ -107,6 +108,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                            );
                                            setState(() {}); // Refresh to show updated state
                                          } else {
+                                           // ignore: use_build_context_synchronously
                                            ScaffoldMessenger.of(context).showSnackBar(
                                              const SnackBar(
                                                content: Text('Cannot enroll in unpurchased course'),
@@ -117,6 +119,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                        }
                                      } catch (e) {
                                        if (mounted) {
+                                         // ignore: use_build_context_synchronously
                                          ScaffoldMessenger.of(context).showSnackBar(
                                            const SnackBar(
                                              content: Text('Failed to enroll. Please try again.'),
@@ -138,6 +141,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                        final success = await _repo.unenrollFromCourse(course.id);
                                        if (mounted) {
                                          if (success) {
+                                           // ignore: use_build_context_synchronously
                                            ScaffoldMessenger.of(context).showSnackBar(
                                              const SnackBar(
                                                content: Text('Successfully unenrolled from course'),
@@ -146,6 +150,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                            );
                                            setState(() {}); // Refresh to show updated state
                                          } else {
+                                           // ignore: use_build_context_synchronously
                                            ScaffoldMessenger.of(context).showSnackBar(
                                              const SnackBar(
                                                content: Text('Failed to unenroll. Please try again.'),
@@ -156,6 +161,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                        }
                                      } catch (e) {
                                        if (mounted) {
+                                         // ignore: use_build_context_synchronously
                                          ScaffoldMessenger.of(context).showSnackBar(
                                            const SnackBar(
                                              content: Text('Failed to unenroll. Please try again.'),
@@ -199,7 +205,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                 Expanded(
                                   child: FilledButton.tonal(
                                     onPressed: enrolled
-                                        ? () => context.push('/dashboard/courses/${course.id}/assessment/question')
+                                        ? () => context.push('/dashboard/assessment')
                                         : null,
                                     child: const Text('Take Assessment'),
                                   ),

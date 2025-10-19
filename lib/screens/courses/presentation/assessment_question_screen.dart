@@ -88,12 +88,14 @@ class _AssessmentQuestionScreenState extends State<AssessmentQuestionScreen> {
                                     try {
                                       final score = await _provider.computeScore(correctOptionIndexes: corrects);
                                       if (!mounted) return;
+                                      // ignore: use_build_context_synchronously
                                       Navigator.of(context).pushNamed(
                                         '/dashboard/courses/${widget.courseId}/assessment/score',
                                         arguments: score,
                                       );
                                     } catch (_) {
                                       if (!mounted) return;
+                                      // ignore: use_build_context_synchronously
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(content: Text('Failed to compute score')),
                                       );

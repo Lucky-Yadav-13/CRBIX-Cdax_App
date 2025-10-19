@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../application/course_providers.dart';
-import '../../courses/data/mock_course_repository.dart';
 import '../../courses/data/models/module.dart';
 import '../../../services/mock_video_service.dart';
 

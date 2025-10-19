@@ -8,7 +8,7 @@ import '../../courses/data/mock_course_repository.dart';
 
 /// HomeScreen
 /// Assumptions:
-/// - Uses Riverpod to read user and course providers.
+/// - Uses Provider to read user and course providers.
 /// - Theme tokens come from AppTheme.
 /// - Navigation handled by GoRouter.
 class HomeScreen extends StatelessWidget {
@@ -94,6 +94,71 @@ class HomeScreen extends StatelessWidget {
                     context.push('/dashboard/courses/${course.id}/module/${module.id}');
                   } catch (_) {}
                 },
+              ),
+
+              const SizedBox(height: 24),
+              
+              // Assessment section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Test Your Skills', style: theme.textTheme.titleMedium),
+                  TextButton(
+                    onPressed: () => context.push('/dashboard/assessment'),
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: InkWell(
+                  onTap: () => context.push('/dashboard/assessment'),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.quiz,
+                            color: theme.colorScheme.onPrimaryContainer,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Take Assessments',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Evaluate your knowledge and earn certificates',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
 
               const SizedBox(height: 24),

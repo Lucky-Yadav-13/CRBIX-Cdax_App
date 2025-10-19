@@ -10,7 +10,7 @@ import '../../screens/dashboard/presentation/home_screen.dart';
 import '../../screens/courses/presentation/course_list_screen.dart';
 import '../../screens/courses/presentation/course_detail_screen.dart';
 import '../../screens/courses/presentation/module_player_screen.dart';
-import '../../screens/courses/presentation/assessment_question_screen.dart';
+import '../../screens/courses/presentation/assessment_question_screen.dart' as courses;
 import '../../screens/courses/presentation/code_challenge_screen.dart';
 import '../../screens/courses/presentation/score_screen.dart';
 import '../../screens/courses/presentation/score_preview_screen.dart';
@@ -24,6 +24,17 @@ import '../../screens/subscription/payment_summary_screen.dart';
 import '../../screens/subscription/payment_methods_screen.dart';
 import '../../screens/subscription/payment_upi_screen.dart';
 import '../../screens/subscription/payment_result_screen.dart';
+import '../../screens/subscription/payment_card_screen.dart';
+import '../../screens/subscription/payment_netbanking_screen.dart';
+import '../../screens/subscription/payment_transfer_screen.dart';
+import '../../screens/assessment/assessment_overview_screen.dart';
+import '../../screens/assessment/assessment_question_screen.dart' as assessment;
+import '../../screens/assessment/assessment_result_screen.dart';
+import '../../screens/assessment/certificate_preview_screen.dart';
+import '../../screens/placement/eligibility_screen.dart';
+import '../../screens/placement/profile_screen.dart' as placement_profile;
+import '../../screens/placement/job_list_screen.dart';
+import '../../screens/placement/job_detail_screen.dart';
 
 /// Centralized application router using GoRouter
 /// Defines all app routes and navigation logic.
@@ -82,7 +93,7 @@ class AppRouter {
               GoRoute(
                 path: 'assessment/question',
                 name: 'dashboardAssessmentQuestion',
-                builder: (context, state) => AssessmentQuestionScreen(courseId: state.pathParameters['id']!),
+                builder: (context, state) => courses.AssessmentQuestionScreen(courseId: state.pathParameters['id']!),
               ),
               GoRoute(
                 path: 'assessment/score',
@@ -166,6 +177,22 @@ class AppRouter {
                 name: 'dashboardPaymentResult',
                 builder: (context, state) => const PaymentResultScreen(),
               ),
+              // Phase 3: New payment method routes
+              GoRoute(
+                path: 'payment/card',
+                name: 'dashboardPaymentCard',
+                builder: (context, state) => const PaymentCardScreen(),
+              ),
+              GoRoute(
+                path: 'payment/netbanking',
+                name: 'dashboardPaymentNetbanking',
+                builder: (context, state) => const PaymentNetbankingScreen(),
+              ),
+              GoRoute(
+                path: 'payment/transfer',
+                name: 'dashboardPaymentTransfer',
+                builder: (context, state) => const PaymentTransferScreen(),
+              ),
             ],
           ),
           GoRoute(
@@ -173,24 +200,74 @@ class AppRouter {
             name: 'dashboardSupport',
             builder: (context, state) => const SupportScreen(),
           ),
+          /// Enhanced Assessment Module routes
+          GoRoute(
+            path: 'assessment',
+            name: 'dashboardAssessment',
+            builder: (context, state) => const AssessmentOverviewScreen(),
+            routes: [
+              GoRoute(
+                path: 'question/:assessmentId',
+                name: 'dashboardAssessmentQuestionNew',
+                builder: (context, state) => assessment.AssessmentQuestionScreen(
+                  assessmentId: state.pathParameters['assessmentId']!,
+                ),
+              ),
+              GoRoute(
+                path: 'result/:assessmentId',
+                name: 'dashboardAssessmentResult',
+                builder: (context, state) => AssessmentResultScreen(
+                  assessmentId: state.pathParameters['assessmentId']!,
+                ),
+              ),
+              GoRoute(
+                path: 'certificate/:assessmentId',
+                name: 'dashboardAssessmentCertificate',
+                builder: (context, state) => CertificatePreviewScreen(
+                  assessmentId: state.pathParameters['assessmentId']!,
+                ),
+              ),
+            ],
+          ),
+          /// Placement Module routes
+          GoRoute(
+            path: 'placement',
+            name: 'dashboardPlacement',
+            redirect: (context, state) {
+              // Add eligibility check here in the future
+              return null;
+            },
+            routes: [
+              GoRoute(
+                path: 'eligibility',
+                name: 'dashboardPlacementEligibility',
+                builder: (context, state) => const PlacementEligibilityScreen(),
+              ),
+              GoRoute(
+                path: 'profile',
+                name: 'dashboardPlacementProfile',
+                builder: (context, state) => const placement_profile.PlacementProfileScreen(),
+              ),
+              GoRoute(
+                path: 'jobs',
+                name: 'dashboardPlacementJobs',
+                builder: (context, state) => const JobListScreen(),
+              ),
+              GoRoute(
+                path: 'job/:jobId',
+                name: 'dashboardPlacementJobDetail',
+                builder: (context, state) => JobDetailScreen(
+                  jobId: state.pathParameters['jobId']!,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     ],
   );
 }
 
-/// Simple placeholder for not-yet-implemented sections.
-class _DashboardPlaceholder extends StatelessWidget {
-  const _DashboardPlaceholder({this.title = 'Dashboard coming soon...'});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text(title)),
-    );
-  }
-}
+// Phase 3: Placeholder class removed - no longer needed
 
 

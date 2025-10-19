@@ -109,6 +109,7 @@ class _CodeChallengeScreenState extends State<CodeChallengeScreen> {
                           : () async {
                               await _runCode();
                               if (!mounted) return;
+                              // ignore: use_build_context_synchronously
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Code submitted')),
                               );

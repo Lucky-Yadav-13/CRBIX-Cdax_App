@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../providers/subscription_provider.dart';
 
 class PaymentResultScreen extends StatelessWidget {
@@ -22,7 +23,7 @@ class PaymentResultScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(success ? Icons.check_circle : Icons.error, size: 72,
-                  color: success ? Colors.green : Colors.red),
+                  color: success ? AppColors.success : AppColors.error),
               const SizedBox(height: 12),
               Text(sub.lastMessage ?? (success ? 'Payment successful' : 'Payment failed')),
               const SizedBox(height: 16),
@@ -39,7 +40,7 @@ class PaymentResultScreen extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Invoice downloaded successfully'),
-                            backgroundColor: Colors.green,
+                            backgroundColor: AppColors.success,
                           ),
                         );
                       }
@@ -48,7 +49,7 @@ class PaymentResultScreen extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Failed to download invoice'),
-                            backgroundColor: Colors.red,
+                            backgroundColor: AppColors.error,
                           ),
                         );
                       }

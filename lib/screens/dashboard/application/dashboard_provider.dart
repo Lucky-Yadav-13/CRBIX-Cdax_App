@@ -1,7 +1,7 @@
-/// Assumptions
-/// - Riverpod is not currently available; using simple mock accessors instead.
-/// - Replace with real repository/services when backend is available.
-/// - Keep model lightweight and serializable-friendly.
+// Assumptions
+// - Provider-based state management using simple mock accessors.
+// - Replace with real repository/services when backend is available.
+// - Keep model lightweight and serializable-friendly.
 
 class Course {
   const Course({

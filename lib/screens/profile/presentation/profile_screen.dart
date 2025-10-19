@@ -1,143 +1,154 @@
 // ASSUMPTION: Avatar uses initials; streak is a small grid placeholder.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../application/profile_provider.dart';
 import '../../courses/data/mock_course_repository.dart';
 import 'profile_edit_screen.dart';
 
-class ProfileScreen extends ConsumerStatefulWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final profile = ref.watch(profileProvider);
-    final initials = profile.name.isNotEmpty
-        ? profile.name.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join()
-        : '?';
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile'), actions: [
-        IconButton(
-          icon: const Icon(Icons.edit),
-          onPressed: () async {
-            final updated = await Navigator.of(context).push<UserProfile>(
-              MaterialPageRoute(
-                builder: (_) => ProfileEditScreen(initial: profile),
-              ),
-            );
-            if (updated != null && mounted) {
-              await ref.read(profileProvider.notifier).updateProfile(updated);
-            }
-          },
-        )
-      ]),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Row(
+    return Consumer<ProfileProvider>(
+      builder: (context, profileProvider, child) {
+        final profile = profileProvider.profile;
+        final initials = profile.name.isNotEmpty
+            ? profile.name.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join()
+            : '?';
+        return Scaffold(
+          appBar: AppBar(title: const Text('Profile'), actions: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: profileProvider.isLoading ? null : () async {
+                final updated = await Navigator.of(context).push<UserProfile>(
+                  MaterialPageRoute(
+                    builder: (_) => ProfileEditScreen(initial: profile),
+                  ),
+                );
+                if (updated != null && mounted) {
+                  await profileProvider.updateProfile(updated);
+                }
+              },
+            )
+          ]),
+          body: ListView(
+            padding: const EdgeInsets.all(16),
             children: [
-              CircleAvatar(radius: 28, child: Text(initials)),
-              const SizedBox(width: 12),
-              Expanded(
+              Row(
+                children: [
+                  CircleAvatar(radius: 28, child: Text(initials)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(profile.name, style: Theme.of(context).textTheme.titleMedium),
+                        Text(profile.email, style: Theme.of(context).textTheme.bodySmall),
+                        Text(profile.phone, style: Theme.of(context).textTheme.bodySmall),
+                      ],
+                    ),
+                  ),
+                  Chip(label: Text(profile.subscribed ? 'Pro' : 'Free')),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.school),
+                  title: const Text('Enrolled courses'),
+                  trailing: Text('${profile.enrolledCoursesCount}'),
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (ctx) => const _EnrolledCoursesSheet(),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text('Streak', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('Streak'),
+                      content: const Text('Detailed streak view placeholder.'),
+                    ),
+                  );
+                },
+                child: _StreakGrid(),
+              ),
+              const SizedBox(height: 16),
+              Card(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(profile.name, style: Theme.of(context).textTheme.titleMedium),
-                    Text(profile.email, style: Theme.of(context).textTheme.bodySmall),
-                    Text(profile.phone, style: Theme.of(context).textTheme.bodySmall),
+                    ListTile(
+                      leading: const Icon(Icons.person),
+                      title: const Text('Profile'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/dashboard/profile/edit'),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.settings),
+                      title: const Text('Settings'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Settings coming soon')),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.menu_book),
+                      title: const Text('Courses'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/dashboard/courses'),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.credit_card),
+                      title: const Text('Payment'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/dashboard/subscription/methods'),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.work),
+                      title: const Text('Placement'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/dashboard/placement/eligibility'),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.privacy_tip),
+                      title: const Text('Privacy Policy'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Privacy Policy coming soon')),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
-              Chip(label: Text(profile.subscribed ? 'Pro' : 'Free')),
             ],
           ),
-          const SizedBox(height: 16),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.school),
-              title: const Text('Enrolled courses'),
-              trailing: Text('${profile.enrolledCoursesCount}'),
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (ctx) => const _EnrolledCoursesSheet(),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text('Streak', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text('Streak'),
-                  content: const Text('Detailed streak view placeholder.'),
-                ),
-              );
-            },
-            child: _StreakGrid(),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Profile'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/dashboard/profile/edit'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Settings'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Settings coming soon')),
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.menu_book),
-                  title: const Text('Courses'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/dashboard/courses'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.credit_card),
-                  title: const Text('Payment'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/dashboard/subscription/methods'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.privacy_tip),
-                  title: const Text('Privacy Policy'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Privacy Policy coming soon')),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -238,5 +249,3 @@ class _MiniCourse {
   final String thumb;
   final double progress;
 }
-
-
