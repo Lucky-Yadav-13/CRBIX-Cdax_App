@@ -190,7 +190,7 @@ class _PlacementEligibilityScreenState extends State<PlacementEligibilityScreen>
                             color: theme.colorScheme.primary,
                             boxShadow: [
                               BoxShadow(
-                                color: theme.colorScheme.primary.withOpacity(0.3),
+                                color: theme.colorScheme.primary.withValues(alpha: 0.3),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -222,7 +222,7 @@ class _PlacementEligibilityScreenState extends State<PlacementEligibilityScreen>
                             color: AppColors.success,
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.success.withOpacity(0.3),
+                                color: AppColors.success.withValues(alpha: 0.3),
                                 blurRadius: 15,
                                 offset: const Offset(0, 5),
                               ),

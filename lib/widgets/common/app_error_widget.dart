@@ -140,9 +140,9 @@ class AppErrorWidget extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.error.withOpacity(0.1),
+        color: AppColors.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

@@ -75,7 +75,7 @@ class _AssessmentQuestionScreenState extends State<AssessmentQuestionScreen> {
     
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         _showExitConfirmation();
       },
@@ -249,7 +249,7 @@ class _AssessmentQuestionScreenState extends State<AssessmentQuestionScreen> {
                     color: theme.colorScheme.surface,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 8,
                         offset: const Offset(0, -2),
                       ),

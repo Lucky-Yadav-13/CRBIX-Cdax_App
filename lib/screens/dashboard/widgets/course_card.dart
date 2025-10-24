@@ -79,7 +79,7 @@ class CourseCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant.withOpacity(0.6),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

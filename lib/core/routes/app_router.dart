@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'page_transitions.dart';
 import '../../screens/auth/presentation/forgot_password_screen.dart';
 import '../../screens/auth/presentation/login_screen.dart';
 import '../../screens/auth/presentation/signup_screen.dart';
@@ -57,12 +58,18 @@ class AppRouter {
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => AppPageTransitions.fadeTransition(
+          child: const LoginScreen(),
+          state: state,
+        ),
       ),
       GoRoute(
         path: '/signup',
         name: 'signup',
-        builder: (context, state) => const SignupScreen(),
+        pageBuilder: (context, state) => AppPageTransitions.slideTransition(
+          child: const SignupScreen(),
+          state: state,
+        ),
       ),
       GoRoute(
         path: '/forgot-password',
@@ -88,7 +95,10 @@ class AppRouter {
           GoRoute(
             path: 'courses/:id',
             name: 'dashboardCourseDetail',
-            builder: (context, state) => CourseDetailScreen(courseId: state.pathParameters['id']!),
+            pageBuilder: (context, state) => AppPageTransitions.heroTransition(
+              child: CourseDetailScreen(courseId: state.pathParameters['id']!),
+              state: state,
+            ),
             routes: [
               GoRoute(
                 path: 'assessment/question',
@@ -165,7 +175,10 @@ class AppRouter {
               GoRoute(
                 path: 'methods',
                 name: 'dashboardPaymentMethods',
-                builder: (context, state) => const PaymentMethodsScreen(),
+                pageBuilder: (context, state) => AppPageTransitions.bottomSheetTransition(
+                  child: const PaymentMethodsScreen(),
+                  state: state,
+                ),
               ),
               GoRoute(
                 path: 'upi',

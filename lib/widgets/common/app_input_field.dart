@@ -6,7 +6,7 @@ import '../../core/constants/app_constants.dart';
 
 /// Standardized input field widget for CDAX App
 /// Provides consistent input field styling throughout the app
-class AppInputField extends StatelessWidget {
+class AppInputField extends StatefulWidget {
   final String? label;
   final String? hint;
   final String? errorText;
@@ -125,83 +125,193 @@ class AppInputField extends StatelessWidget {
        textInputAction = TextInputAction.newline;
 
   @override
+  State<AppInputField> createState() => _AppInputFieldState();
+}
+
+class _AppInputFieldState extends State<AppInputField>
+    with TickerProviderStateMixin {
+  late AnimationController _focusController;
+  late AnimationController _shakeController;
+  late Animation<double> _focusAnimation;
+  late Animation<double> _shakeAnimation;
+  late FocusNode _internalFocusNode;
+  bool _isFocused = false;
+  String? _previousErrorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _focusAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _focusController,
+      curve: Curves.easeInOut,
+    ));
+    _shakeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _shakeController,
+      curve: Curves.elasticIn,
+    ));
+
+    _internalFocusNode = widget.focusNode ?? FocusNode();
+    _internalFocusNode.addListener(_onFocusChange);
+    _previousErrorText = widget.errorText;
+  }
+
+  @override
+  void didUpdateWidget(AppInputField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // Trigger shake animation when error appears
+    if (widget.errorText != null && 
+        widget.errorText != _previousErrorText &&
+        _previousErrorText == null) {
+      _shakeController.reset();
+      _shakeController.forward();
+    }
+    _previousErrorText = widget.errorText;
+  }
+
+  @override
+  void dispose() {
+    _focusController.dispose();
+    _shakeController.dispose();
+    if (widget.focusNode == null) {
+      _internalFocusNode.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      _isFocused = _internalFocusNode.hasFocus;
+    });
+    
+    if (_isFocused) {
+      _focusController.forward();
+    } else {
+      _focusController.reverse();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (label != null) ...[
-          Text(
-            label!,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: AppColors.onSurface,
-            ),
+    return AnimatedBuilder(
+      animation: Listenable.merge([_focusAnimation, _shakeAnimation]),
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(_shakeAnimation.value * 10 * (1 - _shakeAnimation.value), 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (widget.label != null) ...[
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 200),
+                  style: TextStyle(
+                    fontSize: _isFocused ? 15 : 14,
+                    fontWeight: FontWeight.w500,
+                    color: _isFocused 
+                        ? AppColors.primary
+                        : (widget.errorText != null 
+                            ? AppColors.error 
+                            : AppColors.onSurface),
+                  ),
+                  child: Text(widget.label!),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+              ],
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                  boxShadow: _isFocused 
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: TextFormField(
+                  controller: widget.controller,
+                  onChanged: widget.onChanged,
+                  onTap: widget.onTap,
+                  validator: widget.validator,
+                  obscureText: widget.obscureText,
+                  enabled: widget.enabled,
+                  readOnly: widget.readOnly,
+                  keyboardType: widget.keyboardType,
+                  inputFormatters: widget.inputFormatters,
+                  maxLines: widget.maxLines,
+                  maxLength: widget.maxLength,
+                  focusNode: _internalFocusNode,
+                  textInputAction: widget.textInputAction,
+                  onFieldSubmitted: widget.onSubmitted,
+                  decoration: InputDecoration(
+                    hintText: widget.hint,
+                    errorText: widget.errorText,
+                    helperText: widget.helperText,
+                    prefixIcon: widget.prefixIcon,
+                    suffixIcon: widget.suffixIcon,
+                    filled: true,
+                    fillColor: widget.enabled ? AppColors.surface : AppColors.surfaceContainerHighest,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: const BorderSide(color: AppColors.outline),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: const BorderSide(color: AppColors.outline),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: const BorderSide(color: AppColors.error, width: 2),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: const BorderSide(color: AppColors.error, width: 2),
+                    ),
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: BorderSide(color: AppColors.outline.withValues(alpha: 0.5)),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    helperStyle: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                    errorStyle: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.error,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-        ],
-        TextFormField(
-          controller: controller,
-          onChanged: onChanged,
-          onTap: onTap,
-          validator: validator,
-          obscureText: obscureText,
-          enabled: enabled,
-          readOnly: readOnly,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          maxLines: maxLines,
-          maxLength: maxLength,
-          focusNode: focusNode,
-          textInputAction: textInputAction,
-          onFieldSubmitted: onSubmitted,
-          decoration: InputDecoration(
-            hintText: hint,
-            errorText: errorText,
-            helperText: helperText,
-            prefixIcon: prefixIcon,
-            suffixIcon: suffixIcon,
-            filled: true,
-            fillColor: enabled ? AppColors.surface : AppColors.surfaceVariant,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              borderSide: const BorderSide(color: AppColors.outline),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              borderSide: const BorderSide(color: AppColors.outline),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              borderSide: const BorderSide(color: AppColors.error, width: 2),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              borderSide: const BorderSide(color: AppColors.error, width: 2),
-            ),
-            disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              borderSide: BorderSide(color: AppColors.outline.withOpacity(0.5)),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            helperStyle: const TextStyle(
-              fontSize: 12,
-              color: AppColors.onSurfaceVariant,
-            ),
-            errorStyle: const TextStyle(
-              fontSize: 12,
-              color: AppColors.error,
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

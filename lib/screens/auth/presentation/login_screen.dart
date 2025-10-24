@@ -66,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Row(
                 children: [
                   Expanded(
+                    flex: 3,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -81,7 +82,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                  const RobotCharacter(isHappy: true, size: 80),
+                  const Expanded(
+                    flex: 1,
+                    child: RobotCharacter(isHappy: true, size: 60),
+                  ),
                 ],
               ),
             ),
@@ -112,35 +116,41 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SocialLoginButton(
-                          onPressed: () {},
-                          icon: const Text(
-                            'G',
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: SocialLoginButton(
+                            onPressed: () {},
+                            icon: const Text(
+                              'G',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(width: 20),
-                        SocialLoginButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.apple,
-                            color: Colors.black,
-                            size: 24,
+                        Flexible(
+                          child: SocialLoginButton(
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.apple,
+                              color: Colors.black,
+                              size: 24,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 20),
-                        SocialLoginButton(
-                          onPressed: () {},
-                          icon: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
+                        Flexible(
+                          child: SocialLoginButton(
+                            onPressed: () {},
+                            icon: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
                             ),
                           ),
                         ),

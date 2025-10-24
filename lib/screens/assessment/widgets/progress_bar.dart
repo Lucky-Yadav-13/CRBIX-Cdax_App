@@ -72,7 +72,7 @@ class _AssessmentProgressBarState extends State<AssessmentProgressBar>
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -134,7 +134,7 @@ class _AssessmentProgressBarState extends State<AssessmentProgressBar>
                   Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceVariant,
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: ClipRRect(
@@ -167,8 +167,8 @@ class _AssessmentProgressBarState extends State<AssessmentProgressBar>
                             color: isCompleted
                                 ? theme.colorScheme.primary
                                 : isCurrent
-                                    ? theme.colorScheme.primary.withOpacity(0.5)
-                                    : theme.colorScheme.surfaceVariant,
+                                    ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                                    : theme.colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),

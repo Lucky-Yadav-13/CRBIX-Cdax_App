@@ -5,7 +5,7 @@ import '../../core/constants/app_constants.dart';
 
 /// Standardized card widget for CDAX App
 /// Provides consistent card styling throughout the app
-class AppCard extends StatelessWidget {
+class AppCard extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
@@ -66,35 +66,99 @@ class AppCard extends StatelessWidget {
        border = null;
 
   @override
+  State<AppCard> createState() => _AppCardState();
+}
+
+class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
+  late AnimationController _hoverController;
+  late Animation<double> _elevationAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _hoverController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _elevationAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.5,
+    ).animate(CurvedAnimation(
+      parent: _hoverController,
+      curve: Curves.easeOut,
+    ));
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.02,
+    ).animate(CurvedAnimation(
+      parent: _hoverController,
+      curve: Curves.easeOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _hoverController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final baseElevation = widget.elevation ?? AppConstants.cardElevation;
+    
+    return AnimatedBuilder(
+      animation: Listenable.merge([_elevationAnimation, _scaleAnimation]),
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: MouseRegion(
+            onEnter: (_) {
+              if (widget.onTap != null) {
+                _hoverController.forward();
+              }
+            },
+            onExit: (_) {
+              if (widget.onTap != null) {
+                _hoverController.reverse();
+              }
+            },
+            child: _buildCard(baseElevation * _elevationAnimation.value),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCard(double currentElevation) {
     Widget card = Container(
-      margin: margin,
+      margin: widget.margin,
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.surface,
-        borderRadius: borderRadius ?? BorderRadius.circular(AppConstants.borderRadius),
-        border: border,
-        boxShadow: elevation != null && elevation! > 0
+        color: widget.backgroundColor ?? AppColors.surface,
+        borderRadius: widget.borderRadius ?? BorderRadius.circular(AppConstants.borderRadius),
+        border: widget.border,
+        boxShadow: currentElevation > 0
             ? [
                 BoxShadow(
-                  color: AppColors.onSurface.withOpacity(0.1),
-                  blurRadius: elevation! * 2,
-                  offset: Offset(0, elevation!),
+                  color: AppColors.onSurface.withValues(alpha: 0.1),
+                  blurRadius: currentElevation * 2,
+                  offset: Offset(0, currentElevation),
                 ),
               ]
             : null,
       ),
       child: Padding(
-        padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
-        child: child,
+        padding: widget.padding ?? const EdgeInsets.all(AppSpacing.lg),
+        child: widget.child,
       ),
     );
 
-    if (onTap != null) {
+    if (widget.onTap != null) {
       card = Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
-          borderRadius: borderRadius ?? BorderRadius.circular(AppConstants.borderRadius),
+          onTap: widget.onTap,
+          borderRadius: widget.borderRadius ?? BorderRadius.circular(AppConstants.borderRadius),
           child: card,
         ),
       );

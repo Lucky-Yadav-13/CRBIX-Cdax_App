@@ -116,10 +116,10 @@ class _QuestionCardState extends State<QuestionCard>
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: theme.colorScheme.outline.withOpacity(0.2),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Column(
@@ -149,7 +149,7 @@ class _QuestionCardState extends State<QuestionCard>
                             color: theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: theme.colorScheme.outline.withOpacity(0.3),
+                              color: theme.colorScheme.outline.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Column(
@@ -256,12 +256,12 @@ class _QuestionCardState extends State<QuestionCard>
               decoration: BoxDecoration(
                 color: isSelected
                     ? theme.colorScheme.primaryContainer
-                    : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                    : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected
                       ? theme.colorScheme.primary
-                      : theme.colorScheme.outline.withOpacity(0.3),
+                      : theme.colorScheme.outline.withValues(alpha: 0.3),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -339,12 +339,12 @@ class _QuestionCardState extends State<QuestionCard>
                 decoration: BoxDecoration(
                   color: isSelected
                       ? theme.colorScheme.primaryContainer
-                      : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
                         ? theme.colorScheme.primary
-                        : theme.colorScheme.outline.withOpacity(0.3),
+                        : theme.colorScheme.outline.withValues(alpha: 0.3),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -415,7 +415,7 @@ class _QuestionCardState extends State<QuestionCard>
               borderRadius: BorderRadius.circular(12),
             ),
             filled: true,
-            fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           ),
           onChanged: (value) {
             _currentAnswer = value;

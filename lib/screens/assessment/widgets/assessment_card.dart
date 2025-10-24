@@ -33,7 +33,7 @@ class AssessmentCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _getDifficultyColor(assessment.difficulty).withOpacity(0.1),
+                      color: _getDifficultyColor(assessment.difficulty).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -101,26 +101,29 @@ class AssessmentCard extends StatelessWidget {
               const SizedBox(height: 16),
               
               // Assessment details
-              Row(
-                children: [
-                  _buildInfoChip(
-                    icon: Icons.access_time,
-                    label: '${assessment.duration} min',
-                    theme: theme,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildInfoChip(
-                    icon: Icons.quiz,
-                    label: '${assessment.totalQuestions} questions',
-                    theme: theme,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildInfoChip(
-                    icon: Icons.grade,
-                    label: '${assessment.passingScore}% to pass',
-                    theme: theme,
-                  ),
-                ],
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildInfoChip(
+                      icon: Icons.access_time,
+                      label: '${assessment.duration} min',
+                      theme: theme,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildInfoChip(
+                      icon: Icons.quiz,
+                      label: '${assessment.totalQuestions} questions',
+                      theme: theme,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildInfoChip(
+                      icon: Icons.grade,
+                      label: '${assessment.passingScore}% to pass',
+                      theme: theme,
+                    ),
+                  ],
+                ),
               ),
               
               const SizedBox(height: 16),
@@ -152,7 +155,7 @@ class AssessmentCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

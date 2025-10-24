@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../providers/assessment_provider.dart';
 import '../../models/assessment/assessment_model.dart';
 import 'widgets/assessment_card.dart';
+import '../../widgets/animations/staggered_list_animation.dart';
+import '../../widgets/loading/skeleton_loader.dart';
 
 class AssessmentOverviewScreen extends StatefulWidget {
   const AssessmentOverviewScreen({super.key});
@@ -43,11 +45,16 @@ class _AssessmentOverviewScreenState extends State<AssessmentOverviewScreen>
   }
 
   Future<void> _loadAssessments() async {
-    final provider = Provider.of<AssessmentProvider>(context, listen: false);
-    await provider.loadAssessments();
-    if (mounted) {
-      _animationController.forward();
-    }
+    // Use WidgetsBinding to defer until after build is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        final provider = Provider.of<AssessmentProvider>(context, listen: false);
+        await provider.loadAssessments();
+        if (mounted) {
+          _animationController.forward();
+        }
+      }
+    });
   }
 
   @override
@@ -64,14 +71,11 @@ class _AssessmentOverviewScreenState extends State<AssessmentOverviewScreen>
       body: Consumer<AssessmentProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Loading assessments...'),
-                ],
+            return SizedBox(
+              height: 500,
+              child: SkeletonLayouts.list(
+                itemBuilder: () => SkeletonLayouts.assessmentCard(),
+                itemCount: 3,
               ),
             );
           }
@@ -244,9 +248,9 @@ class _AssessmentOverviewScreenState extends State<AssessmentOverviewScreen>
                       separatorBuilder: (context, index) => const SizedBox(height: 16),
                       itemBuilder: (context, index) {
                         final assessment = provider.assessments[index];
-                        return AnimatedContainer(
-                          duration: Duration(milliseconds: 200 + (index * 100)),
-                          curve: Curves.easeOutBack,
+                        return StaggeredListAnimation(
+                          index: index,
+                          delay: const Duration(milliseconds: 150),
                           child: AssessmentCard(
                             assessment: assessment,
                             onStartAssessment: () => _startAssessment(assessment),
@@ -261,10 +265,10 @@ class _AssessmentOverviewScreenState extends State<AssessmentOverviewScreen>
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: theme.colorScheme.outline.withOpacity(0.2),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Row(

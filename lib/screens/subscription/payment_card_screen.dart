@@ -86,10 +86,10 @@ class _PaymentCardScreenState extends State<PaymentCardScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: theme.primaryColor.withOpacity(0.1),
+                    color: theme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: theme.primaryColor.withOpacity(0.3),
+                      color: theme.primaryColor.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Column(
@@ -221,10 +221,10 @@ class _PaymentCardScreenState extends State<PaymentCardScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.1),
+                    color: AppColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: AppColors.success.withOpacity(0.3),
+                      color: AppColors.success.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(

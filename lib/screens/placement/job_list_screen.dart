@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/placement_provider.dart';
 import '../../models/job_model.dart';
+import '../../widgets/animations/staggered_list_animation.dart';
+import '../../widgets/loading/skeleton_loader.dart';
 
 class JobListScreen extends StatefulWidget {
   const JobListScreen({super.key});
@@ -20,7 +22,10 @@ class _JobListScreenState extends State<JobListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadJobs();
+    // Load jobs after the first frame to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadJobs();
+    });
   }
 
   Future<void> _loadJobs() async {
@@ -125,28 +130,13 @@ class _JobListScreenState extends State<JobListScreen> {
   }
 
   Widget _buildLoadingView() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        // Best Match Shimmer
-        Container(
-          height: 200,
-          margin: const EdgeInsets.only(bottom: 24),
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        // Job List Shimmer
-        ...List.generate(5, (index) => Container(
-          height: 120,
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(12),
-          ),
-        )),
-      ],
+    return SizedBox(
+      height: 600,
+      child: SkeletonLayouts.list(
+        itemBuilder: () => SkeletonLayouts.jobCard(),
+        itemCount: 4,
+        padding: const EdgeInsets.all(16),
+      ),
     );
   }
 
@@ -239,10 +229,16 @@ class _JobListScreenState extends State<JobListScreen> {
           const SizedBox(height: 12),
           
           // Jobs List
-          ...jobs.map((job) => Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: _buildJobCard(job, theme, placementProvider),
-          )),
+          ...jobs.asMap().entries.map((entry) => 
+            StaggeredListAnimation(
+              index: entry.key,
+              delay: const Duration(milliseconds: 100),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildJobCard(entry.value, theme, placementProvider),
+              ),
+            ),
+          ),
           
           // Load More Placeholder (future enhancement)
           const SizedBox(height: 32),
@@ -297,7 +293,7 @@ class _JobListScreenState extends State<JobListScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withOpacity(0.2),
+            color: theme.colorScheme.primary.withValues(alpha: 0.2),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -353,7 +349,7 @@ class _JobListScreenState extends State<JobListScreen> {
                           Text(
                             job.companyName,
                             style: theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                              color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -392,13 +388,13 @@ class _JobListScreenState extends State<JobListScreen> {
                         Icon(
                           Icons.location_on_outlined,
                           size: 16,
-                          color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+                          color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           job.location,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                            color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -409,13 +405,13 @@ class _JobListScreenState extends State<JobListScreen> {
                         Icon(
                           Icons.work_outline,
                           size: 16,
-                          color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+                          color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           job.experience,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                            color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -426,12 +422,12 @@ class _JobListScreenState extends State<JobListScreen> {
                         Icon(
                           Icons.currency_rupee,
                           size: 16,
-                          color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+                          color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
                         ),
                         Text(
                           job.ctc,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                            color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -449,7 +445,7 @@ class _JobListScreenState extends State<JobListScreen> {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -521,7 +517,7 @@ class _JobListScreenState extends State<JobListScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceVariant,
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                       image: DecorationImage(
                         image: NetworkImage(job.companyLogo),
@@ -628,7 +624,7 @@ class _JobListScreenState extends State<JobListScreen> {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -647,7 +643,7 @@ class _JobListScreenState extends State<JobListScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.1),
+                    color: AppColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(

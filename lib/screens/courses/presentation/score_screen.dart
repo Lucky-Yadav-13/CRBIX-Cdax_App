@@ -57,7 +57,7 @@ class _PiePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.shortestSide / 2;
     final backgroundPaint = Paint()
-      ..color = color.withOpacity(0.15)
+      ..color = color.withValues(alpha: 0.15)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 18;
     final foregroundPaint = Paint()

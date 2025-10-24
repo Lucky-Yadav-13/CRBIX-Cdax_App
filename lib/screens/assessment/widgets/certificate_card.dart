@@ -80,7 +80,7 @@ class _CertificateCardState extends State<CertificateCard>
               Positioned.fill(
                 child: CustomPaint(
                   painter: _CertificateBackgroundPainter(
-                    color: theme.colorScheme.onPrimaryContainer.withOpacity(0.05),
+                    color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.05),
                   ),
                 ),
               ),
@@ -98,7 +98,7 @@ class _CertificateCardState extends State<CertificateCard>
                           end: Alignment.bottomRight,
                           colors: [
                             Colors.transparent,
-                            Colors.white.withOpacity(0.1),
+                            Colors.white.withValues(alpha: 0.1),
                             Colors.transparent,
                           ],
                           stops: const [0.0, 0.5, 1.0],
@@ -124,7 +124,7 @@ class _CertificateCardState extends State<CertificateCard>
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withOpacity(0.2),
+                            color: theme.colorScheme.primary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
@@ -141,10 +141,10 @@ class _CertificateCardState extends State<CertificateCard>
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surface.withOpacity(0.8),
+                            color: theme.colorScheme.surface.withValues(alpha: 0.8),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: theme.colorScheme.outline.withOpacity(0.3),
+                              color: theme.colorScheme.outline.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Text(
@@ -272,7 +272,7 @@ class _CertificateCardState extends State<CertificateCard>
                         Container(
                           height: 40,
                           width: 1,
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                         _buildInfoColumn(
                           'COMPLETED',
@@ -353,7 +353,7 @@ class _CertificateCardState extends State<CertificateCard>
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+            color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
             letterSpacing: 1.0,
           ),
         ),

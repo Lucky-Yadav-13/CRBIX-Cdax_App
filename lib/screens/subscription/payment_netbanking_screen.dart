@@ -44,10 +44,10 @@ class _PaymentNetbankingScreenState extends State<PaymentNetbankingScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: theme.primaryColor.withOpacity(0.1),
+                    color: theme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: theme.primaryColor.withOpacity(0.3),
+                      color: theme.primaryColor.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Column(
@@ -125,7 +125,7 @@ class _PaymentNetbankingScreenState extends State<PaymentNetbankingScreen> {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: theme.primaryColor.withOpacity(0.1),
+                                color: theme.primaryColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
@@ -167,10 +167,10 @@ class _PaymentNetbankingScreenState extends State<PaymentNetbankingScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.info.withOpacity(0.1),
+                    color: AppColors.info.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: AppColors.info.withOpacity(0.3),
+                      color: AppColors.info.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(

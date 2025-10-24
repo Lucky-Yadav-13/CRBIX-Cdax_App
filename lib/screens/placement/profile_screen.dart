@@ -28,7 +28,10 @@ class _PlacementProfileScreenState extends State<PlacementProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadExistingProfile();
+    // Load existing profile after the first frame to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadExistingProfile();
+    });
   }
 
   void _loadExistingProfile() {
@@ -305,7 +308,7 @@ class _PlacementProfileScreenState extends State<PlacementProfileScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(

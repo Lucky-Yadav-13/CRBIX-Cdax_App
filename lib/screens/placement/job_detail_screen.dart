@@ -27,7 +27,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _loadJobDetails();
+    // Load job details after the first frame to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadJobDetails();
+    });
   }
 
   void _loadJobDetails() {
@@ -94,7 +97,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -208,15 +211,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       );
 
       if (success && mounted) {
-        Navigator.of(modalContext).pop();
+        if (modalContext.mounted) Navigator.of(modalContext).pop();
         _showSuccessSnackBar('Application submitted successfully!');
         setState(() {}); // Refresh UI to show applied state
       } else if (mounted) {
-        // ignore: use_build_context_synchronously
-        _showErrorSnackBar(
-          Provider.of<PlacementProvider>(context, listen: false).error ?? 
-          'Failed to submit application'
-        );
+        final errorMessage = placementProvider.error ?? 'Failed to submit application';
+        _showErrorSnackBar(errorMessage);
       }
     } catch (e) {
       if (mounted) {
@@ -361,7 +361,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   color: theme.colorScheme.surface,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, -5),
                     ),
@@ -379,7 +379,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         style: IconButton.styleFrom(
                           backgroundColor: isSaved 
                               ? theme.colorScheme.primary 
-                              : theme.colorScheme.surfaceVariant,
+                              : theme.colorScheme.surfaceContainerHighest,
                         ),
                       ),
                       
@@ -419,7 +419,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -584,7 +584,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
+                  color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -612,7 +612,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -719,7 +719,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(

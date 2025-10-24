@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../application/course_providers.dart';
 import '../../courses/data/mock_course_repository.dart';
 import 'course_list_card.dart';
+import '../../../widgets/animations/staggered_list_animation.dart';
+import '../../../widgets/loading/skeleton_loader.dart';
 
 class CourseListScreen extends StatefulWidget {
   const CourseListScreen({super.key});
@@ -90,9 +92,12 @@ class _CourseListScreenState extends State<CourseListScreen> {
                 future: _loadFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done && _visible.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.only(top: 80),
-                      child: Center(child: CircularProgressIndicator()),
+                    return SizedBox(
+                      height: 400,
+                      child: SkeletonLayouts.list(
+                        itemBuilder: () => SkeletonLayouts.courseCard(),
+                        itemCount: 3,
+                      ),
                     );
                   }
                   if (snapshot.hasError && _visible.isEmpty) {
@@ -113,9 +118,12 @@ class _CourseListScreenState extends State<CourseListScreen> {
                     itemCount: _visible.length + (_isLoadingMore ? 1 : 0),
                     itemBuilder: (context, index) =>
                         index < _visible.length
-                            ? Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                child: CourseListCard(course: _visible[index]),
+                            ? StaggeredListAnimation(
+                                index: index,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: CourseListCard(course: _visible[index]),
+                                ),
                               )
                             : const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 16),

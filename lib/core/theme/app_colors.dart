@@ -17,7 +17,7 @@ class AppColors {
   
   // Surface colors
   static const Color surface = Color(0xFFFFFFFF); // White
-  static const Color surfaceVariant = Color(0xFFF8F9FA); // Light gray
+  static const Color surfaceContainerHighest = Color(0xFFF8F9FA); // Light gray
   static const Color outline = Color(0xFFE5E7EB); // Border gray
   
   // Text colors

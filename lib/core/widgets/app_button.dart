@@ -26,7 +26,7 @@ class AppButton extends StatelessWidget {
     final String? effectiveLabel = label ?? text;
     final bool enabled = onPressed != null;
 
-    Future<void> _handlePressed() async {
+    Future<void> handlePressed() async {
       if (onPressed == null) return;
       try {
         final result = onPressed!.call();
@@ -73,7 +73,7 @@ class AppButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -82,7 +82,7 @@ class AppButton extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: _handlePressed,
+                onTap: handlePressed,
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -116,7 +116,7 @@ class AppButton extends StatelessWidget {
     );
 
     final Widget button = ElevatedButton(
-      onPressed: enabled ? _handlePressed : null,
+      onPressed: enabled ? handlePressed : null,
       child: buttonChild,
     );
 
