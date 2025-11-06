@@ -1,0 +1,191 @@
+/// User Model
+/// Represents user data from the backend
+class UserModel {
+  final String id;
+  final String email;
+  final String firstName;
+  final String lastName;
+  final String? phoneNumber;
+  final String? profileImage;
+  final DateTime? dateOfBirth;
+  final String? address;
+  final String role;
+  final bool isActive;
+  final bool isEmailVerified;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final UserPreferences? preferences;
+  
+  UserModel({
+    required this.id,
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    this.phoneNumber,
+    this.profileImage,
+    this.dateOfBirth,
+    this.address,
+    required this.role,
+    required this.isActive,
+    required this.isEmailVerified,
+    required this.createdAt,
+    required this.updatedAt,
+    this.preferences,
+  });
+  
+  String get fullName => '$firstName $lastName';
+  
+  String get displayName => fullName.isNotEmpty ? fullName : email;
+  
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      firstName: json['firstName']?.toString() ?? '',
+      lastName: json['lastName']?.toString() ?? '',
+      phoneNumber: json['phoneNumber']?.toString(),
+      profileImage: json['profileImage']?.toString(),
+      dateOfBirth: json['dateOfBirth'] != null 
+          ? DateTime.tryParse(json['dateOfBirth'].toString())
+          : null,
+      address: json['address']?.toString(),
+      role: json['role']?.toString() ?? 'USER',
+      isActive: json['isActive'] ?? true,
+      isEmailVerified: json['isEmailVerified'] ?? false,
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt'].toString())
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null 
+          ? DateTime.parse(json['updatedAt'].toString())
+          : DateTime.now(),
+      preferences: json['preferences'] != null 
+          ? UserPreferences.fromJson(json['preferences'])
+          : null,
+    );
+  }
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'firstName': firstName,
+      'lastName': lastName,
+      'phoneNumber': phoneNumber,
+      'profileImage': profileImage,
+      'dateOfBirth': dateOfBirth?.toIso8601String(),
+      'address': address,
+      'role': role,
+      'isActive': isActive,
+      'isEmailVerified': isEmailVerified,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'preferences': preferences?.toJson(),
+    };
+  }
+  
+  UserModel copyWith({
+    String? id,
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? phoneNumber,
+    String? profileImage,
+    DateTime? dateOfBirth,
+    String? address,
+    String? role,
+    bool? isActive,
+    bool? isEmailVerified,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    UserPreferences? preferences,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      profileImage: profileImage ?? this.profileImage,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      address: address ?? this.address,
+      role: role ?? this.role,
+      isActive: isActive ?? this.isActive,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      preferences: preferences ?? this.preferences,
+    );
+  }
+  
+  @override
+  String toString() {
+    return 'UserModel(id: $id, email: $email, fullName: $fullName)';
+  }
+  
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is UserModel && other.id == id;
+  }
+  
+  @override
+  int get hashCode => id.hashCode;
+}
+
+class UserPreferences {
+  final bool notificationsEnabled;
+  final bool emailNotifications;
+  final bool pushNotifications;
+  final String theme; // 'light', 'dark', 'system'
+  final String language;
+  final bool analyticsEnabled;
+  
+  UserPreferences({
+    required this.notificationsEnabled,
+    required this.emailNotifications,
+    required this.pushNotifications,
+    required this.theme,
+    required this.language,
+    required this.analyticsEnabled,
+  });
+  
+  factory UserPreferences.fromJson(Map<String, dynamic> json) {
+    return UserPreferences(
+      notificationsEnabled: json['notificationsEnabled'] ?? true,
+      emailNotifications: json['emailNotifications'] ?? true,
+      pushNotifications: json['pushNotifications'] ?? true,
+      theme: json['theme']?.toString() ?? 'system',
+      language: json['language']?.toString() ?? 'en',
+      analyticsEnabled: json['analyticsEnabled'] ?? false,
+    );
+  }
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'notificationsEnabled': notificationsEnabled,
+      'emailNotifications': emailNotifications,
+      'pushNotifications': pushNotifications,
+      'theme': theme,
+      'language': language,
+      'analyticsEnabled': analyticsEnabled,
+    };
+  }
+  
+  UserPreferences copyWith({
+    bool? notificationsEnabled,
+    bool? emailNotifications,
+    bool? pushNotifications,
+    String? theme,
+    String? language,
+    bool? analyticsEnabled,
+  }) {
+    return UserPreferences(
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      emailNotifications: emailNotifications ?? this.emailNotifications,
+      pushNotifications: pushNotifications ?? this.pushNotifications,
+      theme: theme ?? this.theme,
+      language: language ?? this.language,
+      analyticsEnabled: analyticsEnabled ?? this.analyticsEnabled,
+    );
+  }
+}

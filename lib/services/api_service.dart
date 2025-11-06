@@ -1,0 +1,83 @@
+/// API Service
+/// Main API service that coordinates all API operations
+import '../core/base_api_service.dart';
+import '../core/api_response.dart';
+import '../models/user_model.dart';
+import '../models/course_model.dart';
+import '../models/performance_model.dart';
+import '../config/api_constants.dart';
+
+class ApiService extends BaseApiService {
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+  ApiService._internal();
+  
+  // User operations
+  Future<ApiResponse<UserModel>> getCurrentUser() async {
+    return await get<UserModel>(
+      ApiConstants.userProfile,
+      fromJson: (json) => UserModel.fromJson(json),
+    );
+  }
+  
+  Future<ApiResponse<UserModel>> updateProfile(Map<String, dynamic> data) async {
+    return await put<UserModel>(
+      ApiConstants.updateProfile,
+      body: data,
+      fromJson: (json) => UserModel.fromJson(json),
+    );
+  }
+  
+  // Course operations
+  Future<ApiResponse<List<CourseModel>>> getCourses({
+    int page = 0,
+    int size = 20,
+    String? search,
+    String? category,
+  }) async {
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'size': size.toString(),
+    };
+    if (search != null) queryParams['search'] = search;
+    if (category != null) queryParams['category'] = category;
+    
+    return await get<List<CourseModel>>(
+      ApiConstants.courses,
+      queryParameters: queryParams,
+      fromJson: (json) => (json['content'] as List)
+          .map((e) => CourseModel.fromJson(e))
+          .toList(),
+    );
+  }
+  
+  Future<ApiResponse<CourseModel>> getCourseById(String courseId) async {
+    final endpoint = ApiConstants.replacePathParams(
+      ApiConstants.courseDetails,
+      {'id': courseId},
+    );
+    
+    return await get<CourseModel>(
+      endpoint,
+      fromJson: (json) => CourseModel.fromJson(json),
+    );
+  }
+  
+  // Performance operations
+  Future<ApiResponse<List<PerformanceModel>>> getPerformanceData({
+    String? courseId,
+    String? userId,
+  }) async {
+    final queryParams = <String, String>{};
+    if (courseId != null) queryParams['courseId'] = courseId;
+    if (userId != null) queryParams['userId'] = userId;
+    
+    return await get<List<PerformanceModel>>(
+      ApiConstants.performance,
+      queryParameters: queryParams,
+      fromJson: (json) => (json as List)
+          .map((e) => PerformanceModel.fromJson(e))
+          .toList(),
+    );
+  }
+}

@@ -32,18 +32,28 @@ class MockCourseRepository implements CourseRepository {
       final modules = List<Module>.generate(4, (index) {
         final int num = index + 1;
         final bool locked = !isSubscribed && num > 1; // only first open if not subscribed
+        final String videoUrl = i == 1 ? 'https://youtu.be/RFThBMUs3e0' :
+                               i == 2 ? 'https://youtu.be/7MQe8B5n2t8' :
+                               'https://youtu.be/loYQ4CkTngo';
         return Module(
           id: 'm${i}_$num',
           title: 'Module $num',
           durationSec: 600 + num * 120,
           isLocked: locked,
-          videoUrl: 'https://example.com/video/$id/$num',
+          videoUrl: videoUrl,
         );
       });
+      final String courseTitle = i == 1 ? 'Flutter Development' : 
+                            i == 2 ? 'Python Development' : 
+                            'Java Programming';
+      final String courseDescription = i == 1 ? 'Comprehensive Flutter development course with practical projects.' :
+                                     i == 2 ? 'Complete Python development course from basics to advanced.' :
+                                     'Complete Java programming course with hands-on coding.';
+      
       list.add(Course(
         id: id,
-        title: 'Course $i',
-        description: 'Concise description for course $i with key outcomes.',
+        title: courseTitle,
+        description: courseDescription,
         thumbnailUrl: 'https://picsum.photos/seed/$id/800/450',
         progressPercent: isSubscribed ? (0.15 * i).clamp(0, 1) : 0.0,
         isSubscribed: isSubscribed,
