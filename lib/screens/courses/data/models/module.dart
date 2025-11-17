@@ -3,6 +3,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'video.dart';
+import '../../../../models/assessment/assessment_model.dart';
 
 @immutable
 class Module {
@@ -13,6 +14,7 @@ class Module {
   final bool isLocked;
   final int orderIndex; // Order within the course
   final List<Video> videos; // List of videos in this module
+  final Assessment? assessment; // Assessment for this module
   
   // Legacy support - first video URL for backward compatibility
   String get videoUrl => videos.isNotEmpty ? videos.first.youtubeUrl : '';
@@ -25,6 +27,7 @@ class Module {
     required this.isLocked,
     this.orderIndex = 0,
     this.videos = const [],
+    this.assessment,
   });
 
   // JSON serialization for API integration
@@ -41,6 +44,18 @@ class Module {
         print('   ├─ Found ${videosList.length} videos in module');
       }
 
+      // Parse assessment - backend doesn't include assessment in module JSON
+      // Assessment needs to be fetched separately using API
+      Assessment? assessment;
+      if (json['assessment'] != null && json['assessment'] is Map<String, dynamic>) {
+        try {
+          assessment = Assessment.fromJson(json['assessment']);
+          print('   ├─ Found assessment: ${assessment.title}');
+        } catch (e) {
+          print('   ⚠️ Error parsing assessment: $e');
+        }
+      }
+
       return Module(
         id: json['id']?.toString() ?? '',
         title: json['title']?.toString() ?? 'Untitled Module',
@@ -49,6 +64,7 @@ class Module {
         isLocked: _parseBoolSafely(json['isLocked'], false),
         orderIndex: _parseIntSafely(json['orderIndex'] ?? json['order'], 0),
         videos: videosList,
+        assessment: assessment,
       );
     } catch (e) {
       print('❌ Error parsing Module JSON: $e');
@@ -65,6 +81,7 @@ class Module {
       'isLocked': isLocked,
       'orderIndex': orderIndex,
       'videos': videos.map((video) => video.toJson()).toList(),
+      'assessment': assessment?.toJson(),
     };
   }
 
@@ -90,6 +107,7 @@ class Module {
           isLocked: isLocked,
         ),
       ],
+      assessment: null, // Legacy modules don't have assessments
     );
   }
 

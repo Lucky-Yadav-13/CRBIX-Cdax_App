@@ -23,15 +23,15 @@ class Assessment {
 
   factory Assessment.fromJson(Map<String, dynamic> json) {
     return Assessment(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      category: json['category'] as String,
-      duration: json['duration'] as int,
-      difficulty: json['difficulty'] as String,
-      description: json['description'] as String,
-      totalQuestions: json['total_questions'] as int,
-      passingScore: json['passing_score'] as int,
-      isActive: json['is_active'] as bool? ?? true,
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      category: json['category']?.toString() ?? 'General',
+      duration: json['duration'] ?? 30, // Default 30 minutes
+      difficulty: json['difficulty']?.toString() ?? 'Medium',
+      description: json['description']?.toString() ?? '',
+      totalQuestions: json['total_questions'] ?? json['totalQuestions'] ?? 0,
+      passingScore: json['passing_score'] ?? json['passingScore'] ?? json['totalMarks'] ?? 0,
+      isActive: json['is_active'] ?? json['isActive'] ?? true,
     );
   }
 
@@ -39,6 +39,7 @@ class Assessment {
     return {
       'id': id,
       'title': title,
+      'totalMarks': passingScore, // Backend expects totalMarks
       'category': category,
       'duration': duration,
       'difficulty': difficulty,

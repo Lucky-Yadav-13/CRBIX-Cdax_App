@@ -17,6 +17,7 @@ import '../../screens/courses/presentation/score_screen.dart';
 import '../../screens/courses/presentation/score_preview_screen.dart';
 import '../../screens/courses/presentation/certificate_screen.dart';
 import '../../screens/courses/presentation/course_video_screen.dart';
+import '../../screens/courses/presentation/module_assessment_screen.dart';
 import '../../screens/support/presentation/support_screen.dart';
 import '../../screens/profile/presentation/profile_screen.dart';
 import '../../screens/profile/presentation/profile_edit_screen.dart';
@@ -148,6 +149,17 @@ class AppRouter {
               courseId: state.pathParameters['courseId']!,
               moduleId: state.pathParameters['moduleId']!,
             ),
+            routes: [
+              GoRoute(
+                path: 'assessment/:assessmentId',
+                name: 'dashboardModuleAssessment',
+                builder: (context, state) => ModuleAssessmentScreen(
+                  courseId: state.pathParameters['courseId']!,
+                  moduleId: state.pathParameters['moduleId']!,
+                  assessmentId: state.pathParameters['assessmentId']!,
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: 'profile',

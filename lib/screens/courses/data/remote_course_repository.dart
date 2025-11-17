@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'models/course.dart';
 import 'mock_course_repository.dart';
+import '../../../models/assessment/question_model.dart';
+import '../../../models/assessment/assessment_model.dart';
 
 /// Remote implementation of CourseRepository that communicates with Spring Boot backend
 /// Automatically falls back to mock data if backend is unavailable
@@ -292,6 +294,145 @@ class RemoteCourseRepository implements CourseRepository {
       
       // Fallback to mock repository
       return await _fallbackRepository.purchaseCourse(courseId);
+    }
+  }
+
+  @override
+  Future<List<Question>> getAssessmentQuestions(String assessmentId) async {
+    print('\n📡 Fetching assessment questions from backend...');
+    print('   ├─ Assessment ID: $assessmentId');
+    print('   ├─ Assessment ID type: ${assessmentId.runtimeType}');
+    print('   ├─ Base URL: $baseUrl');
+    print('   └─ URL: $baseUrl/api/assessments/$assessmentId/questions');
+    
+    try {
+      final uri = Uri.parse('$baseUrl/api/assessments/$assessmentId/questions');
+      print('   🌐 Full request URL: $uri');
+      
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ).timeout(timeout);
+      
+      print('   📨 Response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        print('   ✅ Successfully received questions data');
+        
+        // Handle different response structures
+        List<dynamic> questionsData = [];
+        if (jsonResponse.containsKey('data') && jsonResponse['data'] is List) {
+          questionsData = jsonResponse['data'] as List;
+        } else if (jsonResponse.containsKey('questions') && jsonResponse['questions'] is List) {
+          questionsData = jsonResponse['questions'] as List;
+        } else if (jsonResponse is List) {
+          questionsData = jsonResponse as List;
+        }
+        
+        print('   📋 Found ${questionsData.length} questions in response');
+        
+        // Parse questions
+        final List<Question> questions = questionsData.map((questionJson) {
+          try {
+            return Question.fromJson(questionJson);
+          } catch (e) {
+            print('   ⚠️ Error parsing question: $e');
+            print('   📄 Problematic question data: $questionJson');
+            rethrow;
+          }
+        }).toList();
+        
+        print('   ❓ Successfully parsed ${questions.length} questions');
+        
+        return questions;
+      } else {
+        print('   ❌ Backend returned error: ${response.statusCode}');
+        print('   📄 Error response: ${response.body}');
+        throw Exception('Backend returned ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      print('   🚨 Error fetching questions from backend: $e');
+      print('   🔄 Falling back to mock data...');
+      
+      // Fallback to mock repository
+      final mockQuestions = await _fallbackRepository.getAssessmentQuestions(assessmentId);
+      print('   ✅ Mock fallback returned ${mockQuestions.length} questions');
+      return mockQuestions;
+    }
+  }
+
+  @override
+  Future<List<Assessment>> getModuleAssessments(String moduleId) async {
+    print('\n📡 Fetching module assessments from backend...');
+    print('   ├─ Module ID: $moduleId');
+    print('   └─ URL: $baseUrl/api/modules/$moduleId/assessments');
+    
+    try {
+      final uri = Uri.parse('$baseUrl/api/modules/$moduleId/assessments');
+      print('   🌐 Full request URL: $uri');
+      
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ).timeout(timeout);
+      
+      print('   📨 Response status: ${response.statusCode}');
+      print('   📄 Response body length: ${response.body.length}');
+      print('   📄 Response body preview: ${response.body.length > 200 ? response.body.substring(0, 200) + "..." : response.body}');
+      
+      if (response.statusCode == 200) {
+        final dynamic jsonDecoded = json.decode(response.body);
+        print('   📊 Response type: ${jsonDecoded.runtimeType}');
+        
+        List<dynamic> jsonResponse = [];
+        if (jsonDecoded is List) {
+          jsonResponse = jsonDecoded;
+        } else if (jsonDecoded is Map<String, dynamic>) {
+          if (jsonDecoded.containsKey('data')) {
+            jsonResponse = jsonDecoded['data'] as List;
+          } else if (jsonDecoded.containsKey('questions')) {
+            jsonResponse = jsonDecoded['questions'] as List;
+          } else {
+            print('   ⚠️ Unexpected response structure: ${jsonDecoded.keys}');
+            jsonResponse = [];
+          }
+        }
+        
+        print('   ✅ Successfully received questions data');
+        print('   📋 Found ${jsonResponse.length} questions in response');
+        
+        // Parse assessments
+        final List<Assessment> assessments = jsonResponse.map((assessmentJson) {
+          try {
+            return Assessment.fromJson(assessmentJson);
+          } catch (e) {
+            print('   ⚠️ Error parsing assessment: $e');
+            print('   📄 Problematic assessment data: $assessmentJson');
+            rethrow;
+          }
+        }).toList();
+        
+        print('   📝 Successfully parsed ${assessments.length} assessments');
+        
+        return assessments;
+      } else {
+        print('   ❌ Backend returned error: ${response.statusCode}');
+        print('   📄 Error response: ${response.body}');
+        throw Exception('Backend returned ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      print('   🚨 Error fetching assessments from backend: $e');
+      print('   🔄 Falling back to mock data...');
+      
+      // Fallback to mock repository
+      return await _fallbackRepository.getModuleAssessments(moduleId);
     }
   }
 }

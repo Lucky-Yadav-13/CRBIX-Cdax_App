@@ -4,6 +4,8 @@
 import 'dart:math';
 import 'models/course.dart';
 import 'models/module.dart';
+import '../../../models/assessment/question_model.dart';
+import '../../../models/assessment/assessment_model.dart';
 
 /// CourseRepository interface (documented for swap-in)
 /// Implementations should provide methods used by providers below.
@@ -13,6 +15,8 @@ abstract class CourseRepository {
   Future<bool> enrollInCourse(String courseId);
   Future<bool> unenrollFromCourse(String courseId);
   Future<bool> purchaseCourse(String courseId);
+  Future<List<Question>> getAssessmentQuestions(String assessmentId);
+  Future<List<Assessment>> getModuleAssessments(String moduleId);
 }
 
 class MockCourseRepository implements CourseRepository {
@@ -29,23 +33,54 @@ class MockCourseRepository implements CourseRepository {
     for (int i = 1; i <= 3; i++) {
       final String id = 'c$i';
       final bool isSubscribed = i % 2 == 1 || _purchasedCourses.contains(id); // mix + purchased
+      final String courseTitle = i == 1 ? 'Flutter Development' : 
+                            i == 2 ? 'Python Development' : 
+                            'Java Programming';
+      
       final modules = List<Module>.generate(4, (index) {
         final int num = index + 1;
         final bool locked = !isSubscribed && num > 1; // only first open if not subscribed
         final String videoUrl = i == 1 ? 'https://youtu.be/RFThBMUs3e0' :
                                i == 2 ? 'https://youtu.be/7MQe8B5n2t8' :
                                'https://youtu.be/loYQ4CkTngo';
-        return Module.legacy(
+        
+        // Create assessment for modules 2 and 4 to add variety
+        Assessment? assessment;
+        if (num == 2 || num == 4) {
+          assessment = Assessment(
+            id: 'assessment_${i}_$num',
+            title: 'Module $num Assessment',
+            category: courseTitle,
+            duration: 15 + num * 5, // 20-35 minutes
+            difficulty: num == 2 ? 'Easy' : 'Medium',
+            description: 'Test your understanding of Module $num concepts',
+            totalQuestions: 5 + num,
+            passingScore: 70,
+            isActive: !locked, // Only active if module is unlocked
+          );
+        }
+        
+        // Create module with assessment
+        final baseModule = Module.legacy(
           id: 'm${i}_$num',
           title: 'Module $num',
           durationSec: 600 + num * 120,
           isLocked: locked,
           videoUrl: videoUrl,
         );
+        
+        // Return module with assessment if exists
+        return Module(
+          id: baseModule.id,
+          title: baseModule.title,
+          description: baseModule.description,
+          durationSec: baseModule.durationSec,
+          isLocked: baseModule.isLocked,
+          orderIndex: baseModule.orderIndex,
+          videos: baseModule.videos,
+          assessment: assessment,
+        );
       });
-      final String courseTitle = i == 1 ? 'Flutter Development' : 
-                            i == 2 ? 'Python Development' : 
-                            'Java Programming';
       final String courseDescription = i == 1 ? 'Comprehensive Flutter development course with practical projects.' :
                                      i == 2 ? 'Complete Python development course from basics to advanced.' :
                                      'Complete Java programming course with hands-on coding.';
@@ -148,6 +183,59 @@ class MockCourseRepository implements CourseRepository {
     // Auto-enroll user after purchase
     _enrolledCourses.add(courseId);
     return true;
+  }
+
+  @override
+  Future<List<Question>> getAssessmentQuestions(String assessmentId) async {
+    print('🔧 MockCourseRepository: Generating questions for assessment $assessmentId');
+    await Future.delayed(_delay());
+    // Generate mock questions for the assessment
+    final random = Random(assessmentId.hashCode);
+    final questionCount = 3 + random.nextInt(5); // 3-7 questions
+    
+    final questions = List<Question>.generate(questionCount, (index) {
+      final questionNumber = index + 1;
+      final optionCount = 4;
+      final correctIndex = random.nextInt(optionCount);
+      
+      return Question(
+        id: '${assessmentId}_q$questionNumber',
+        assessmentId: assessmentId,
+        question: 'Question $questionNumber: What is the correct concept related to this topic?',
+        type: QuestionType.multipleChoice,
+        options: List<String>.generate(optionCount, (i) => 'Option ${String.fromCharCode(65 + i)}'),
+        correctAnswer: correctIndex,
+        points: 1,
+        explanation: 'Option ${String.fromCharCode(65 + correctIndex)} is correct because it represents the fundamental concept.',
+      );
+    });
+    
+    print('✅ MockCourseRepository: Generated ${questions.length} questions');
+    return questions;
+  }
+
+  @override
+  Future<List<Assessment>> getModuleAssessments(String moduleId) async {
+    await Future.delayed(_delay());
+    print('🎯 MockCourseRepository: getModuleAssessments called for module $moduleId');
+    
+    // Always return an assessment for testing
+    final assessments = [
+      Assessment(
+        id: '${moduleId}_assessment',
+        title: 'Module Assessment',
+        category: 'Quiz',
+        duration: 15,
+        difficulty: 'Medium',
+        description: 'Test your understanding of this module',
+        totalQuestions: 5,
+        passingScore: 60,
+        isActive: true,
+      ),
+    ];
+    
+    print('✅ MockCourseRepository: Returning ${assessments.length} assessments');
+    return assessments;
   }
 }
 

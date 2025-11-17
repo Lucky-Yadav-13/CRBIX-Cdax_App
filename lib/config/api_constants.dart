@@ -2,7 +2,8 @@
 /// All API-related constants and endpoints
 class ApiConstants {
   // Base URLs
-  static const String baseUrl = 'http://localhost:8080'; // Update with your Spring Boot API URL
+  // static const String baseUrl = 'https://cdax-backend-hosting-2.onrender.com'; // Update with your Spring Boot API URL
+  static const String baseUrl = 'https://cdax-assessment-hosting.onrender.com'; // Update with your Spring Boot API URL
   static const String apiVersion = '/api/v1';
   static const String fullApiUrl = '$baseUrl$apiVersion';
   

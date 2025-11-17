@@ -212,18 +212,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                               children: [
                                 Expanded(
                                   child: FilledButton.tonal(
-                                    onPressed: enrolled
-                                        ? () => context.push('/dashboard/assessment')
-                                        : null,
+                                    onPressed: () => context.push('/dashboard/assessment'),
                                     child: const Text('Take Assessment'),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: FilledButton.tonal(
-                                    onPressed: enrolled
-                                        ? () => context.push('/dashboard/courses/${course.id}/code')
-                                        : null,
+                                    onPressed: () => context.push('/dashboard/courses/${course.id}/code'),
                                     child: const Text('Solve Problem'),
                                   ),
                                 ),
@@ -231,9 +227,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                             ),
                             const SizedBox(height: 8),
                             FilledButton.tonal(
-                              onPressed: enrolled
-                                  ? () => context.push('/dashboard/courses/${course.id}/certificate')
-                                  : null,
+                              onPressed: () => context.push('/dashboard/courses/${course.id}/certificate'),
                               child: const Text('View Certificate'),
                             ),
                           ],

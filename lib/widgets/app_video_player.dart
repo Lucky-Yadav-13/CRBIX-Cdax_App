@@ -19,6 +19,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
   bool _initError = false;
   bool _isYouTubeUrl = false;
   bool _isInitialized = false;
+  String? _youtubeId;
 
   @override
   void initState() {
@@ -43,8 +44,12 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
       // Check if the URL is a YouTube URL
       final String? youtubeId = YoutubePlayer.convertUrlToId(widget.videoUrl);
       
+      print('🎥 Video URL: ${widget.videoUrl}');
+      print('🔍 Extracted YouTube ID: $youtubeId');
+      print('🌐 Platform: ${kIsWeb ? "Web" : "Mobile"}');
+      
       if (youtubeId != null) {
-        // YouTube URL - use youtube_player_flutter for mobile/APK
+        // YouTube URL - handle both mobile and web
         if (!kIsWeb) {
           // Mobile platform - use YoutubePlayerController
           final youtubeController = YoutubePlayerController(
@@ -63,13 +68,15 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
           if (!mounted) return;
           setState(() {
             _youtubeCtrl = youtubeController;
+            _youtubeId = youtubeId;
             _isYouTubeUrl = true;
             _isInitialized = true;
           });
         } else {
-          // Web platform - show message or use iframe
+          // Web platform - store YouTube ID for iframe
           if (!mounted) return;
           setState(() {
+            _youtubeId = youtubeId;
             _isYouTubeUrl = true;
             _isInitialized = true;
           });
@@ -166,21 +173,38 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
 
     // Show YouTube player
     if (_isYouTubeUrl) {
-      if (kIsWeb) {
-        // Web platform - show iframe or message
+      if (kIsWeb && _youtubeId != null) {
+        // Web platform - show message for now since iframe requires web-specific imports
+        print('🌐 Using Web YouTube Player for ID: $_youtubeId');
         return Container(
-          height: 200,
-          color: Colors.black,
-          child: const Center(
-            child: Text(
-              'YouTube videos not fully supported on web.\nPlease use the mobile app.',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-              textAlign: TextAlign.center,
+          width: double.infinity,
+          height: 280,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.play_circle_filled, size: 64, color: Colors.white),
+                const SizedBox(height: 16),
+                const Text(
+                  'YouTube Video',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Video ID: $_youtubeId',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
             ),
           ),
         );
       } else if (_youtubeCtrl != null) {
         // Mobile platform - use YoutubePlayer
+        print('📱 Using Mobile YouTube Player');
         return Container(
           color: Colors.black,
           child: YoutubePlayer(
@@ -206,10 +230,10 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
               ),
             ],
             onReady: () {
-              print('YouTube player is ready');
+              print('📱 Mobile YouTube player is ready');
             },
             onEnded: (data) {
-              print('YouTube video ended');
+              print('📱 Mobile YouTube video ended');
             },
           ),
         );
@@ -235,5 +259,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
     );
   }
 }
+
+
 
 

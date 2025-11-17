@@ -5,19 +5,48 @@ import 'package:go_router/go_router.dart';
 import '../application/course_providers.dart';
 import '../../courses/data/models/module.dart';
 import '../../../services/mock_video_service.dart';
+import '../../../services/assessment_service.dart';
+import '../../../models/assessment/assessment_model.dart';
 
-class ModulePlayerScreen extends StatelessWidget {
+class ModulePlayerScreen extends StatefulWidget {
   const ModulePlayerScreen({super.key, required this.courseId, required this.moduleId});
   final String courseId;
   final String moduleId;
 
   @override
+  State<ModulePlayerScreen> createState() => _ModulePlayerScreenState();
+}
+
+class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
+  List<Assessment> _assessments = [];
+  bool _assessmentsLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAssessments();
+  }
+
+  Future<void> _loadAssessments() async {
+    final assessments = await AssessmentService.getModuleAssessments(
+      courseId: widget.courseId,
+      moduleId: widget.moduleId,
+    );
+    if (mounted) {
+      setState(() {
+        _assessments = assessments;
+        _assessmentsLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Get repository using factory
     final repo = CourseProviders.getCourseRepository();
-    print('🎬 ModulePlayerScreen: Using ${repo.runtimeType} for course $courseId, module $moduleId');
+    print('🎬 ModulePlayerScreen: Using ${repo.runtimeType} for course ${widget.courseId}, module ${widget.moduleId}');
     return FutureBuilder(
-      future: repo.getCourseById(courseId),
+      future: repo.getCourseById(widget.courseId),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -31,7 +60,7 @@ class ModulePlayerScreen extends StatelessWidget {
         }
         Module? module;
         for (final m in course.modules) {
-          if (m.id == moduleId) {
+          if (m.id == widget.moduleId) {
             module = m;
             break;
           }
@@ -42,53 +71,331 @@ class ModulePlayerScreen extends StatelessWidget {
               body: const Center(child: Text('Module not found')));
         }
         // Save last played (mock)
-        LastPlayedStore.instance.setLastPlayed(courseId, moduleId);
+        LastPlayedStore.instance.setLastPlayed(widget.courseId, widget.moduleId);
+        
+        // Make module non-null for the rest of the widget
+        final currentModule = module;
+        
         return Scaffold(
-          appBar: AppBar(title: Text(module.title)),
-          body: ListView(
-            padding: const EdgeInsets.all(16),
+          appBar: AppBar(
+            title: Text(currentModule.title),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                // Navigate back to the course detail page
+                context.go('/dashboard/courses/${widget.courseId}');
+              },
+            ),
+          ),
+          body: Column(
             children: [
-              FutureBuilder<String>(
-                future: MockVideoService.getModuleVideoUrl(courseId: courseId, moduleId: moduleId),
-                builder: (context, snap) {
-                  if (snap.connectionState != ConnectionState.done) {
-                    return const AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  if (snap.hasError || (snap.data ?? '').isEmpty) {
-                    return const AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Center(child: Text('Unable to load video')),
-                    );
-                  }
-                  final url = snap.data!;
-                  return FilledButton(
-                    onPressed: () => context.push('/dashboard/courses/$courseId/module/$moduleId/video?url=$url'),
-                    child: const Text('Watch Video'),
-                  );
-                },
+              // Scrollable content area
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // Module title
+                    Text(
+                      currentModule.title, 
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+
+                    
+                    // All videos in module - Multiple video support
+                    ...currentModule.videos.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final video = entry.value;
+                      
+                      return Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: GestureDetector(
+                          onTap: () async {
+                            // Use specific video URL from the video object
+                            final url = video.youtubeUrl.isNotEmpty 
+                              ? video.youtubeUrl 
+                              : await MockVideoService.getModuleVideoUrl(courseId: widget.courseId, moduleId: widget.moduleId);
+                            if (url.isNotEmpty) {
+                              // ignore: use_build_context_synchronously
+                              context.push('/dashboard/courses/${widget.courseId}/module/${widget.moduleId}/video?url=$url');
+                            }
+                          },
+                          child: Row(
+                            children: [
+                              // Play icon - fixed size
+                              Icon(
+                                Icons.play_circle_filled,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              // Video info - flexible to take available space
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // Video title with fallback numbering
+                                    Text(
+                                      video.title.isNotEmpty 
+                                        ? video.title 
+                                        : 'Video ${index + 1}',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    // Video-specific duration
+                                    Text(
+                                      video.durationSec > 0 
+                                        ? '${(video.durationSec / 60).round()} min'
+                                        : '${(currentModule.durationSec / 60).round()} min',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Navigation arrow - fixed size
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Icon(
+                                  Icons.play_arrow,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    
+                    // Fallback if no videos exist
+                    if (currentModule.videos.isEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: GestureDetector(
+                          onTap: () async {
+                            final url = await MockVideoService.getModuleVideoUrl(courseId: widget.courseId, moduleId: widget.moduleId);
+                            if (url.isNotEmpty) {
+                              // ignore: use_build_context_synchronously
+                              context.push('/dashboard/courses/${widget.courseId}/module/${widget.moduleId}/video?url=$url');
+                            }
+                          },
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.play_circle_filled,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'Video 1',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${(currentModule.durationSec / 60).round()} min',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Icon(
+                                  Icons.play_arrow,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    
+                    // Assessment section
+                    if (!_assessmentsLoading && _assessments.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        'Assessment',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ..._assessments.map((assessment) => Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: GestureDetector(
+                          onTap: () {
+                            // Navigate to assessment screen
+                            print('🚀 Navigating to assessment: ${assessment.id}');
+                            print('   📍 Course: ${widget.courseId}, Module: ${widget.moduleId}');
+                            context.push('/dashboard/courses/${widget.courseId}/module/${widget.moduleId}/assessment/${assessment.id}');
+                          },
+                          child: Row(
+                            children: [
+                              // Assessment icon - fixed size
+                              Icon(
+                                Icons.quiz,
+                                color: Theme.of(context).colorScheme.secondary,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              // Assessment info - flexible to take available space
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // Assessment title
+                                    Text(
+                                      assessment.title,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    // Assessment details
+                                    Text(
+                                      '${assessment.totalQuestions} questions • ${assessment.duration} min',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Navigation arrow - fixed size
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                  size: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )).toList(),
+                    ],
+                    
+                    // Loading indicator for assessments
+                    if (_assessmentsLoading) ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        'Assessment',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      ),
+                    ],
+                    
+                    // Add some bottom padding to prevent content from being hidden behind the button
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              Text(module.title, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 8),
-              const Text('Lesson description placeholder. Replace with backend content.'),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () {
-                  final modules = course.modules;
-                  final idx = modules.indexWhere((m) => m.id == moduleId);
-                  if (idx >= 0 && idx < modules.length - 1) {
-                    final next = modules[idx + 1];
-                    if (!next.isLocked) {
-                      // Use go_router for navigation
-                      // ignore: use_build_context_synchronously
-                      context.go('/dashboard/courses/${course.id}/module/${next.id}');
-                    }
-                  }
-                },
-                child: const Text('Next lesson'),
+              // Fixed Next lesson button at bottom
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: SafeArea(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        final modules = course.modules;
+                        final idx = modules.indexWhere((m) => m.id == widget.moduleId);
+                        if (idx >= 0 && idx < modules.length - 1) {
+                          final next = modules[idx + 1];
+                          if (!next.isLocked) {
+                            // Use go_router for navigation
+                            // ignore: use_build_context_synchronously
+                            context.go('/dashboard/courses/${course.id}/module/${next.id}');
+                          }
+                        }
+                      },
+                      icon: Icon(
+                        Icons.skip_next,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                      label: Text(
+                        'Next lesson',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 2,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
