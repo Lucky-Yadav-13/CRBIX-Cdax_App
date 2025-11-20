@@ -5,6 +5,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'models/course.dart';
+import 'models/module.dart';
+import 'models/video.dart';
 import 'mock_course_repository.dart';
 import '../../../models/assessment/question_model.dart';
 import '../../../models/assessment/assessment_model.dart';
@@ -93,8 +95,11 @@ class RemoteCourseRepository implements CourseRepository {
           int totalVideos = course.modules.fold(0, (sum, module) => sum + module.videos.length);
           print('   ├─ ${course.title}: ${course.modules.length} modules, $totalVideos videos');
         }
-        
-        return courses;
+
+        // Apply client-side lock propagation so remote data matches mock behavior
+        final List<Course> adjustedCourses = courses.map((c) => _applyLockingToCourse(c)).toList();
+
+        return adjustedCourses;
       } else {
         print('   ❌ Backend returned error: ${response.statusCode}');
         print('   📄 Error response: ${response.body}');
@@ -146,8 +151,10 @@ class RemoteCourseRepository implements CourseRepository {
         final Course course = Course.fromJson(courseData);
         int totalVideos = course.modules.fold(0, (sum, module) => sum + module.videos.length);
         print('   🎓 Course: ${course.title} (${course.modules.length} modules, $totalVideos videos)');
-        
-        return course;
+
+        // Apply client-side lock propagation so videos/modules respect purchase/subscription
+        final Course adjusted = _applyLockingToCourse(course);
+        return adjusted;
       } else {
         print('   ❌ Backend returned error: ${response.statusCode}');
         print('   📄 Error response: ${response.body}');
@@ -280,6 +287,11 @@ class RemoteCourseRepository implements CourseRepository {
         print('   ✅ Successfully purchased course');
         print('   📄 Response: $jsonResponse');
         
+        // Mark local mock fallback as purchased as well so client-side access works
+        try {
+          await _fallbackRepository.purchaseCourse(courseId);
+        } catch (_) {}
+
         return jsonResponse['success'] == true || 
                jsonResponse['purchased'] == true || 
                response.statusCode == 201;
@@ -434,5 +446,79 @@ class RemoteCourseRepository implements CourseRepository {
       // Fallback to mock repository
       return await _fallbackRepository.getModuleAssessments(moduleId);
     }
+  }
+
+  // Apply lock logic to a Course instance so remote data behaves like mock data.
+  // Rules:
+  // - If course.isSubscribed == true => all modules and videos unlocked.
+  // - If not subscribed => only module at index 0 is unlocked; within an unlocked module
+  //   only video at index 0 is unlocked. All other modules/videos are locked.
+  Course _applyLockingToCourse(Course course) {
+    final bool subscribed = course.isSubscribed;
+
+    final modules = <Module>[];
+    for (var mIndex = 0; mIndex < course.modules.length; mIndex++) {
+      final m = course.modules[mIndex];
+      final bool moduleLocked = !subscribed && mIndex > 0;
+
+      final videos = <Video>[];
+      for (var vIndex = 0; vIndex < m.videos.length; vIndex++) {
+        final v = m.videos[vIndex];
+        final bool videoLocked = subscribed ? false : (moduleLocked ? true : (vIndex != 0));
+
+        videos.add(Video(
+          id: v.id,
+          title: v.title,
+          description: v.description,
+          youtubeUrl: v.youtubeUrl,
+          durationSec: v.durationSec,
+          orderIndex: v.orderIndex,
+          thumbnailUrl: v.thumbnailUrl,
+          isLocked: videoLocked,
+          isCompleted: v.isCompleted,
+        ));
+      }
+
+      modules.add(Module(
+        id: m.id,
+        title: m.title,
+        description: m.description,
+        durationSec: m.durationSec,
+        isLocked: moduleLocked,
+        orderIndex: m.orderIndex,
+        videos: videos,
+        // If module is locked, ensure its assessment is marked inactive so UI treats it as locked
+        assessment: m.assessment != null
+            ? Assessment(
+                id: m.assessment!.id,
+                title: m.assessment!.title,
+                category: m.assessment!.category,
+                duration: m.assessment!.duration,
+                difficulty: m.assessment!.difficulty,
+                description: m.assessment!.description,
+                totalQuestions: m.assessment!.totalQuestions,
+                passingScore: m.assessment!.passingScore,
+                isActive: !moduleLocked,
+              )
+            : null,
+      ));
+    }
+
+    return Course(
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      thumbnailUrl: course.thumbnailUrl,
+      progressPercent: course.progressPercent,
+      isSubscribed: course.isSubscribed,
+      isEnrolled: course.isEnrolled,
+      modules: modules,
+      instructor: course.instructor,
+      rating: course.rating,
+      studentsCount: course.studentsCount,
+      category: course.category,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+    );
   }
 }

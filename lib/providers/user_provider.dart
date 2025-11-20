@@ -23,14 +23,12 @@ class UserProvider with ChangeNotifier {
     _isLoading = loading;
     notifyListeners();
   }
-  
-  // Set error
+
   void _setError(String? error) {
     _error = error;
     notifyListeners();
   }
-  
-  // Set current user
+
   void setCurrentUser(UserModel? user) {
     _currentUser = user;
     _error = null;
@@ -65,23 +63,38 @@ class UserProvider with ChangeNotifier {
   
   // Login user
   Future<bool> login(String email, String password) async {
-    _setLoading(true);
-    _setError(null);
-    
-    final response = await _authService.login(email: email, password: password);
-    
-    if (response.isSuccess && response.data != null && response.data!.success) {
-      _currentUser = response.data!.user;
-      _isAuthenticated = true;
-      _setLoading(false);
-      return true;
-    } else {
-      _setError(response.data?.message ?? response.error ?? 'Login failed');
-      _isAuthenticated = false;
-      _setLoading(false);
+    // Basic input validation
+    if (email.trim().isEmpty || password.trim().isEmpty) {
+      _setError('Email and password are required');
       return false;
     }
+    
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      final response = await _authService.login(
+        email: email,
+        password: password,
+      );
+
+      if (response.isSuccess && response.data != null && response.data!.success) {
+        _currentUser = response.data!.user;
+        _isAuthenticated = true;
+        return true;
+      } else {
+        _setError(response.data?.message ?? response.error ?? 'Login failed');
+        _isAuthenticated = false;
+        return false;
+      }
+    } catch (e) {
+      _setError('Unexpected error: ${e.toString()}');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
+
   
   // Register user
   Future<bool> register({
@@ -92,27 +105,33 @@ class UserProvider with ChangeNotifier {
     required String password,
     required String confirmPassword,
   }) async {
-    _setLoading(true);
-    _setError(null);
-    
-    final response = await _authService.register(
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      mobile: mobile,
-      password: password,
-      confirmPassword: confirmPassword,
-    );
-    
-    if (response.isSuccess && response.data != null && response.data!.success) {
-      _setLoading(false);
-      return true;
-    } else {
-      _setError(response.data?.message ?? response.error ?? 'Registration failed');
-      _setLoading(false);
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      final response = await _authService.register(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        mobile: mobile,
+        password: password,
+        confirmPassword: confirmPassword,
+      );
+
+      if (response.isSuccess && response.data != null && response.data!.success) {
+        return true;
+      } else {
+        _setError(response.data?.message ?? response.error ?? 'Registration failed');
+        return false;
+      }
+    } catch (e) {
+      _setError('Unexpected error: ${e.toString()}');
       return false;
+    } finally {
+      _setLoading(false);
     }
   }
+
   
   // Logout user
   Future<void> logout() async {

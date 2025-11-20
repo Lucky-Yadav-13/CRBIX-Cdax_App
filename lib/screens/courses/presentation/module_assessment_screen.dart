@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import '../application/course_providers.dart';
 import '../../../models/assessment/question_model.dart';
@@ -29,10 +30,12 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
   @override
   void initState() {
     super.initState();
-    print('🎯 ModuleAssessmentScreen: initState() called');
-    print('   ├─ Course ID: ${widget.courseId}');
-    print('   ├─ Module ID: ${widget.moduleId}');
-    print('   └─ Assessment ID: ${widget.assessmentId}');
+    if (kDebugMode) {
+      debugPrint('🎯 ModuleAssessmentScreen: initState() called');
+      debugPrint('   ├─ Course ID: ${widget.courseId}');
+      debugPrint('   ├─ Module ID: ${widget.moduleId}');
+      debugPrint('   └─ Assessment ID: ${widget.assessmentId}');
+    }
     _loadQuestions();
   }
 
@@ -224,7 +227,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
           // Progress indicator
           LinearProgressIndicator(
             value: (currentQuestionIndex + 1) / totalQuestions,
-            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
           ),
           
@@ -287,7 +290,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -300,7 +303,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
               color: Theme.of(context).scaffoldBackgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),

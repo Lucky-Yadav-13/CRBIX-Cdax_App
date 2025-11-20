@@ -1,6 +1,7 @@
 // Course Repository Factory
 // Automatically chooses between remote and mock repository based on configuration
 
+import 'package:flutter/foundation.dart';
 import '../screens/courses/data/mock_course_repository.dart';
 import '../screens/courses/data/remote_course_repository.dart';
 import '../config/backend_config.dart';
@@ -15,21 +16,27 @@ class CourseRepositoryFactory {
   static CourseRepository getInstance() {
     if (_instance != null) return _instance!;
     
-    print('\n🏭 CourseRepositoryFactory: Creating repository instance...');
+    if (kDebugMode) {
+      debugPrint('\n🏭 CourseRepositoryFactory: Creating repository instance...');
+    }
     
     // Check if backend should be used
     if (BackendConfig.shouldUseBackend && BackendConfig.validateConfig()) {
-      print('   ├─ Backend is configured and enabled');
-      print('   ├─ Base URL: ${BackendConfig.baseUrl}');
-      print('   └─ Creating RemoteCourseRepository with fallback to mock');
+      if (kDebugMode) {
+        debugPrint('   ├─ Backend is configured and enabled');
+        debugPrint('   ├─ Base URL: ${BackendConfig.baseUrl}');
+        debugPrint('   └─ Creating RemoteCourseRepository with fallback to mock');
+      }
       
       _instance = RemoteCourseRepository(
         baseUrl: BackendConfig.baseUrl,
         timeout: BackendConfig.requestTimeout,
       );
     } else {
-      print('   ├─ Backend is not configured or disabled');
-      print('   └─ Creating MockCourseRepository');
+      if (kDebugMode) {
+        debugPrint('   ├─ Backend is not configured or disabled');
+        debugPrint('   └─ Creating MockCourseRepository');
+      }
       
       _instance = MockCourseRepository();
     }

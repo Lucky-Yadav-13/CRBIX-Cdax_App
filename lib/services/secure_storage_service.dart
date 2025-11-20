@@ -47,7 +47,9 @@ class SecureStorageService {
     try {
       return await _storage.read(key: _customerTokenKey);
     } catch (e) {
-      debugPrint('SecureStorageService: Failed to read customer token: $e');
+      if (kDebugMode) {
+        debugPrint('SecureStorageService: Failed to read customer token: $e');
+      }
       return null;
     }
   }
@@ -67,7 +69,9 @@ class SecureStorageService {
     try {
       return await _storage.read(key: _sessionTokenKey);
     } catch (e) {
-      debugPrint('SecureStorageService: Failed to read session token: $e');
+      if (kDebugMode) {
+        debugPrint('SecureStorageService: Failed to read session token: $e');
+      }
       return null;
     }
   }

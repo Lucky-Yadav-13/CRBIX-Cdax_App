@@ -117,6 +117,14 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                         child: GestureDetector(
                           onTap: () async {
+                            // Block navigation if this video is locked for the user
+                            if (video.isLocked) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('This lesson is locked. Purchase the course to access.')),
+                              );
+                              return;
+                            }
+
                             // Use specific video URL from the video object
                             final url = video.youtubeUrl.isNotEmpty 
                               ? video.youtubeUrl 
@@ -130,8 +138,9 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                             children: [
                               // Play icon - fixed size
                               Icon(
-                                Icons.play_circle_filled,
-                                color: Theme.of(context).colorScheme.primary,
+                                // show lock icon when the video is locked
+                                video.isLocked ? Icons.lock : Icons.play_circle_filled,
+                                color: video.isLocked ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4) : Theme.of(context).colorScheme.primary,
                                 size: 24,
                               ),
                               const SizedBox(width: 12),
@@ -161,7 +170,7 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                                         : '${(currentModule.durationSec / 60).round()} min',
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                       ),
                                     ),
                                   ],
@@ -171,8 +180,8 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                               Padding(
                                 padding: const EdgeInsets.only(left: 8),
                                 child: Icon(
-                                  Icons.play_arrow,
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                  video.isLocked ? Icons.lock_outline : Icons.play_arrow,
+                                  color: video.isLocked ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5) : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                   size: 20,
                                 ),
                               ),
@@ -180,7 +189,7 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                     
                     // Fallback if no videos exist
                     if (currentModule.videos.isEmpty)
@@ -189,6 +198,12 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                         child: GestureDetector(
                           onTap: () async {
+                            if (currentModule.isLocked) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('This lesson is locked. Purchase the course to access.')),
+                              );
+                              return;
+                            }
                             final url = await MockVideoService.getModuleVideoUrl(courseId: widget.courseId, moduleId: widget.moduleId);
                             if (url.isNotEmpty) {
                               // ignore: use_build_context_synchronously
@@ -198,8 +213,8 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                           child: Row(
                             children: [
                               Icon(
-                                Icons.play_circle_filled,
-                                color: Theme.of(context).colorScheme.primary,
+                                currentModule.isLocked ? Icons.lock : Icons.play_circle_filled,
+                                color: currentModule.isLocked ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4) : Theme.of(context).colorScheme.primary,
                                 size: 24,
                               ),
                               const SizedBox(width: 12),
@@ -222,7 +237,7 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                                       '${(currentModule.durationSec / 60).round()} min',
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                       ),
                                     ),
                                   ],
@@ -231,8 +246,8 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                               Padding(
                                 padding: const EdgeInsets.only(left: 8),
                                 child: Icon(
-                                  Icons.play_arrow,
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                  currentModule.isLocked ? Icons.lock_outline : Icons.play_arrow,
+                                  color: currentModule.isLocked ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5) : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                   size: 20,
                                 ),
                               ),
@@ -294,7 +309,7 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                                       '${assessment.totalQuestions} questions • ${assessment.duration} min',
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                       ),
                                     ),
                                   ],
@@ -305,14 +320,14 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                                 padding: const EdgeInsets.only(left: 8),
                                 child: Icon(
                                   Icons.arrow_forward_ios,
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                   size: 16,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      )).toList(),
+                      )),
                     ],
                     
                     // Loading indicator for assessments
@@ -350,7 +365,7 @@ class _ModulePlayerScreenState extends State<ModulePlayerScreen> {
                   color: Theme.of(context).scaffoldBackgroundColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 4,
                       offset: const Offset(0, -2),
                     ),

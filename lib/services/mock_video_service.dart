@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../screens/courses/application/course_providers.dart';
 
 class MockVideoService {
@@ -7,7 +8,9 @@ class MockVideoService {
     try {
       // Get the actual course data from the repository (backend or mock)
       final repo = CourseProviders.getCourseRepository();
-      print('🎬 MockVideoService: Getting intro URL for course $courseId using ${repo.runtimeType}');
+      if (kDebugMode) {
+        debugPrint('🎬 MockVideoService: Getting intro URL for course $courseId using ${repo.runtimeType}');
+      }
       final course = await repo.getCourseById(courseId);
       
       // Return the first module's video URL as course intro
@@ -28,7 +31,9 @@ class MockVideoService {
     try {
       // Get the actual course data from the repository (backend or mock)
       final repo = CourseProviders.getCourseRepository();
-      print('🎬 MockVideoService: Getting video URL for course $courseId, module $moduleId using ${repo.runtimeType}');
+      if (kDebugMode) {
+        debugPrint('🎬 MockVideoService: Getting video URL for course $courseId, module $moduleId using ${repo.runtimeType}');
+      }
       final course = await repo.getCourseById(courseId);
       
       // Find the specific module
@@ -41,7 +46,9 @@ class MockVideoService {
       return module.videoUrl;
     } catch (e) {
       // Fallback to demo video if anything goes wrong
-      print('Error loading module video for courseId: $courseId, moduleId: $moduleId - $e');
+      if (kDebugMode) {
+        debugPrint('Error loading module video for courseId: $courseId, moduleId: $moduleId - $e');
+      }
       return 'https://samplelib.com/lib/preview/mp4/sample-10s.mp4';
     }
   }

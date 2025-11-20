@@ -44,9 +44,9 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
       // Check if the URL is a YouTube URL
       final String? youtubeId = YoutubePlayer.convertUrlToId(widget.videoUrl);
       
-      print('🎥 Video URL: ${widget.videoUrl}');
-      print('🔍 Extracted YouTube ID: $youtubeId');
-      print('🌐 Platform: ${kIsWeb ? "Web" : "Mobile"}');
+      debugPrint('🎥 Video URL: ${widget.videoUrl}');
+      debugPrint('🔍 Extracted YouTube ID: $youtubeId');
+      debugPrint('🌐 Platform: ${kIsWeb ? "Web" : "Mobile"}');
       
       if (youtubeId != null) {
         // YouTube URL - handle both mobile and web
@@ -108,7 +108,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
         });
       }
     } catch (e) {
-      print('Video initialization error: $e');
+      debugPrint('Video initialization error: $e');
       if (!mounted) return;
       setState(() {
         _initError = true;
@@ -175,7 +175,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
     if (_isYouTubeUrl) {
       if (kIsWeb && _youtubeId != null) {
         // Web platform - show message for now since iframe requires web-specific imports
-        print('🌐 Using Web YouTube Player for ID: $_youtubeId');
+        debugPrint('🌐 Using Web YouTube Player for ID: $_youtubeId');
         return Container(
           width: double.infinity,
           height: 280,
@@ -204,7 +204,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
         );
       } else if (_youtubeCtrl != null) {
         // Mobile platform - use YoutubePlayer
-        print('📱 Using Mobile YouTube Player');
+        debugPrint('📱 Using Mobile YouTube Player');
         return Container(
           color: Colors.black,
           child: YoutubePlayer(

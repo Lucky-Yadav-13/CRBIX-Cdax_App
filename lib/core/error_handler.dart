@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_response.dart';
 import '../config/api_constants.dart';
@@ -140,9 +141,13 @@ class ErrorHandler {
   static void logError(dynamic error, [StackTrace? stackTrace]) {
     // Only log in debug mode
     assert(() {
-      print('🔥 API Error: $error');
+      if (kDebugMode) {
+        debugPrint('🔥 API Error: $error');
+      }
       if (stackTrace != null) {
-        print('📍 Stack Trace: $stackTrace');
+        if (kDebugMode) {
+          debugPrint('📍 Stack Trace: $stackTrace');
+        }
       }
       return true;
     }());

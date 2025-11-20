@@ -1,23 +1,24 @@
 // Enhanced Video Service for Spring Boot backend integration
 // Handles multiple videos per module and backend/mock fallback
 
+import 'package:flutter/foundation.dart';
 import '../screens/courses/application/course_providers.dart';
 import '../screens/courses/data/models/video.dart';
 
 class VideoService {
   /// Get course intro video URL (first video of first module)
   static Future<String> getCourseIntroUrl(String courseId) async {
-    print('\n🎬 VideoService: Getting intro URL for course $courseId');
+    debugPrint('\n🎬 VideoService: Getting intro URL for course $courseId');
     
     try {
       final repo = CourseProviders.getCourseRepository();
       final course = await repo.getCourseById(courseId);
       
-      print('   ├─ Course found: ${course.title}');
+      debugPrint('   ├─ Course found: ${course.title}');
       
       if (course.modules.isNotEmpty) {
         final firstModule = course.modules.first;
-        print('   ├─ First module: ${firstModule.title}');
+        debugPrint('   ├─ First module: ${firstModule.title}');
         
         if (firstModule.videos.isNotEmpty) {
           final introVideo = firstModule.videos.first;

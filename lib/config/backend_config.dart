@@ -1,6 +1,8 @@
 // Backend API configuration for Spring Boot integration
 // Update the baseUrl when you have your Spring Boot backend ready
 
+import 'package:flutter/foundation.dart';
+
 class BackendConfig {
   // TODO: Replace with your actual Spring Boot backend URL
   // Example: static const String baseUrl = 'http://localhost:8080';
@@ -30,7 +32,9 @@ class BackendConfig {
   // Helper method to log debug messages
   static void debugLog(String message) {
     if (enableDebugLogs) {
-      print('🔧 BackendConfig: $message');
+      if (kDebugMode) {
+        debugPrint('🔧 BackendConfig: $message');
+      }
     }
   }
   

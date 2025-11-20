@@ -16,6 +16,11 @@ class AuthService {
     required String email,
     required String password,
   }) async {
+    // Input validation
+    if (email.trim().isEmpty || password.trim().isEmpty) {
+      return ApiResponse.error('Email and password are required');
+    }
+    
     try {
       final response = await _httpService.post<AuthResponse>(
         ApiEndpoints.login,
@@ -60,6 +65,17 @@ class AuthService {
     required String password,
     required String confirmPassword,
   }) async {
+    // Input validation
+    if (firstName.trim().isEmpty || lastName.trim().isEmpty || 
+        email.trim().isEmpty || mobile.trim().isEmpty || 
+        password.trim().isEmpty || confirmPassword.trim().isEmpty) {
+      return ApiResponse.error('All fields are required');
+    }
+    
+    if (password != confirmPassword) {
+      return ApiResponse.error('Passwords do not match');
+    }
+    
     try {
       final response = await _httpService.post<AuthResponse>(
         ApiEndpoints.register,
